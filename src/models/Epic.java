@@ -42,4 +42,13 @@ public class Epic extends Task {
             this.setStatus(TaskStatus.IN_PROGRESS);
         }
     }
+
+    public List<Subtask> getSubtasks() {
+        return subtasks;
+    }
+
+    public void updateSubtasks(Subtask updatedSubtask) {
+        int indexOfSubtaskToUpdate = subtasks.indexOf(updatedSubtask);
+        subtasks.set(indexOfSubtaskToUpdate, updatedSubtask);
+    }
 }

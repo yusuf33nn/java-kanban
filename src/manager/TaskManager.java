@@ -4,39 +4,39 @@ import models.Epic;
 import models.Subtask;
 import models.Task;
 
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
+import java.util.*;
 
 public class TaskManager {
     private static long TASK_ID_COUNTER = 0;
 
     private final Map<Long, Task> taskMap = new HashMap<>();
-    private final Map<Long, Task> subtaskMap = new HashMap<>();
-    private final Map<Long, Task> epicMap = new HashMap<>();
+    private final Map<Long, Subtask> subtaskMap = new HashMap<>();
+    private final Map<Long, Epic> epicMap = new HashMap<>();
 
     public List<Task> getAllTasks() {
         return taskMap.values().stream().toList();
     }
 
-    public List<Task> getAllSubtasks() {
+    public List<Subtask> getAllSubtasks() {
         return subtaskMap.values().stream().toList();
     }
 
-    public List<Task> getAllEpics() {
+    public List<Epic> getAllEpics() {
         return epicMap.values().stream().toList();
     }
 
     public Task createNewTask(Task task) {
         long taskId = ++TASK_ID_COUNTER;
         task.setId(taskId);
-        if (task instanceof Subtask) {
-            subtaskMap.put(taskId, task);
-            return task;
-        } else if (task instanceof Epic) {
-            epicMap.put(taskId, task);
-            return task;
+        if (task instanceof Subtask subtask) {
+            subtaskMap.put(taskId, subtask);
+            var epic = subtask.getEpic();
+            epic.getSubtasks().add(subtask);
+            epic.calculateEpicStatus();
+            return subtask;
+        } else if (task instanceof Epic epic) {
+            epicMap.put(taskId, epic);
+            return epic;
         } else {
             taskMap.put(taskId, task);
             return task;
@@ -63,9 +63,15 @@ public class TaskManager {
         if (taskMap.containsKey(taskId)) {
             taskMap.put(taskId, updatedTask);
         } else if (subtaskMap.containsKey(taskId)) {
-            subtaskMap.put(taskId, updatedTask);
-        } else if (epicMap.containsKey(taskId)){
-            epicMap.put(taskId, updatedTask);
+            Subtask updatedSubtask = (Subtask) updatedTask;
+            subtaskMap.put(taskId, updatedSubtask);
+            var epic = updatedSubtask.getEpic();
+            epic.updateSubtasks(updatedSubtask);
+            epic.calculateEpicStatus();
+        } else if (epicMap.containsKey(taskId)) {
+            Epic updatedEpic = (Epic) updatedTask;
+            updatedEpic.calculateEpicStatus();
+            epicMap.put(taskId, updatedEpic);
         } else {
             throw new RuntimeException("Task with id = %d doesn't not exist".formatted(taskId));
         }
@@ -75,11 +81,45 @@ public class TaskManager {
         if (taskMap.containsKey(taskId)) {
             taskMap.remove(taskId);
         } else if (subtaskMap.containsKey(taskId)) {
-            subtaskMap.remove(taskId);
-        } else if (epicMap.containsKey(taskId)){
-            epicMap.remove(taskId);
+            removeSubtask(taskId);
+        } else if (epicMap.containsKey(taskId)) {
+            removeEpic(taskId);
         } else {
             throw new RuntimeException("Task with id = %d doesn't not exist".formatted(taskId));
+        }
+    }
+
+    public void removeSubtask(long subtaskId) {
+        var subtask = subtaskMap.get(subtaskId);
+        subtaskMap.remove(subtaskId);
+        var epic = subtask.getEpic();
+        epic.getSubtasks().remove(subtask);
+        epic.calculateEpicStatus();
+    }
+
+    public void removeEpic(long epicId) {
+        List<Long> subtasksToBeDeleted = epicMap.get(epicId).getSubtasks().stream().map(Task::getId).toList();
+        epicMap.remove(epicId);
+        for (Long subtaskId : subtasksToBeDeleted) {
+            subtaskMap.remove(subtaskId);
+        }
+    }
+
+    public void removeTasks() {
+        taskMap.clear();
+    }
+
+    public void removeSubtasks() {
+        Set<Long> subtaskIds = subtaskMap.keySet();
+        for (Long subtaskId : subtaskIds) {
+            removeSubtask(subtaskId);
+        }
+    }
+
+    public void removeEpics() {
+        Set<Long> epicIds = epicMap.keySet();
+        for (Long epicId : epicIds) {
+            removeEpic(epicId);
         }
     }
 
