@@ -57,6 +57,12 @@ public class TaskManager {
         return task;
     }
 
+    public List<Subtask> getEpicSubtasks(long epicId) {
+        return Optional.ofNullable(epicMap.getOrDefault(epicId, null))
+                .map(Epic::getSubtasks)
+                .orElseThrow(() -> new RuntimeException("Epic with epicId = %d doesn't not exist".formatted(epicId)));
+    }
+
 
     public void updateTask(Task updatedTask) {
         long taskId = updatedTask.getId();
