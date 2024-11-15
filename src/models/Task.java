@@ -61,4 +61,11 @@ public class Task {
     public int hashCode() {
         return Objects.hash(id);
     }
+
+    public Task copy() {
+        Task copy = new Task(this.name, this.description);
+        copy.setId(this.id);
+        copy.setStatus(this.status);
+        return copy;
+    }
 }

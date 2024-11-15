@@ -1,6 +1,7 @@
 package history;
 
 import models.Task;
+import utils.CopyUtils;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -14,7 +15,8 @@ public class InMemoryHistoryManager implements HistoryManager {
         if (taskHistory.size() == 10) {
             taskHistory.removeFirst();
         }
-        taskHistory.add(task);
+        Task copy = CopyUtils.copyForHistory(task);
+        taskHistory.add(copy);
     }
 
     @Override

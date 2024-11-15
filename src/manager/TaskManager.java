@@ -31,4 +31,6 @@ public interface TaskManager {
     Epic getEpic(long epicId);
 
     HistoryManager getHistoryManager();
+
+    void resetCounter();
 }

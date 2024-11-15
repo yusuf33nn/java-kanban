@@ -51,4 +51,15 @@ public class Epic extends Task {
         int indexOfSubtaskToUpdate = subtasks.indexOf(updatedSubtask);
         subtasks.set(indexOfSubtaskToUpdate, updatedSubtask);
     }
+
+    @Override
+    public Epic copy() {
+        Epic copy = new Epic(this.getName(), this.getDescription());
+        copy.setId(this.getId());
+        copy.setStatus(this.getStatus());
+        for (Subtask subtask : this.getSubtasks()) {
+            copy.addSubtask(subtask.copy());
+        }
+        return copy;
+    }
 }

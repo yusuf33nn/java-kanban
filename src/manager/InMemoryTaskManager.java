@@ -110,27 +110,38 @@ public class InMemoryTaskManager implements TaskManager {
     @Override
     public Task getTask(long taskId) {
         var task = taskMap.getOrDefault(taskId, null);
-        historyManager.add(task);
+        if (task != null) {
+            historyManager.add(task);
+        }
         return task;
     }
 
     @Override
     public Subtask getSubtask(long subtaskId) {
         var subtask = subtaskMap.getOrDefault(subtaskId, null);
-        historyManager.add(subtask);
+        if (subtask != null) {
+            historyManager.add(subtask);
+        }
         return subtask;
     }
 
     @Override
     public Epic getEpic(long epicId) {
         var epic = epicMap.getOrDefault(epicId, null);
-        historyManager.add(epic);
+        if (epic != null) {
+            historyManager.add(epic);
+        }
         return epic;
     }
 
     @Override
     public HistoryManager getHistoryManager() {
         return historyManager;
+    }
+
+    @Override
+    public void resetCounter() {
+        TASK_ID_COUNTER = 0;
     }
 
     public void removeSubtask(long subtaskId) {

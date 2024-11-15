@@ -21,6 +21,15 @@ public class Subtask extends Task {
     @Override
     public void setStatus(TaskStatus status) {
         super.setStatus(status);
-        epic.calculateEpicStatus();
+    }
+
+    @Override
+    public Subtask copy() {
+        Subtask copy = new Subtask(this.getName(), this.getDescription());
+        copy.setId(this.getId());
+        copy.setEpic(this.getEpic());
+        copy.setStatus(this.getStatus());
+        return copy;
+
     }
 }
