@@ -1,5 +1,3 @@
-import history.HistoryManager;
-import manager.InMemoryTaskManager;
 import manager.TaskManager;
 import models.Epic;
 import models.Subtask;
@@ -31,8 +29,6 @@ public class Main {
 
         Epic epic2 = new Epic("epic2", "epic2_desc2");
         taskManager.createNewTask(epic2);
-
-        HistoryManager historyManager = Managers.getDefaultHistory();
 
         taskManager.getById(3L);
         taskManager.getById(1L);
