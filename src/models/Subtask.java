@@ -30,6 +30,5 @@ public class Subtask extends Task {
         copy.setEpic(this.getEpic());
         copy.setStatus(this.getStatus());
         return copy;
-
     }
 }
