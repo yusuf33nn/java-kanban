@@ -27,8 +27,7 @@ class InMemoryHistoryManagerTest {
         assertNotNull(retrievedTask1Again);
 
         List<Task> history = taskManager.getHistoryManager().getHistory();
-        assertEquals(2, history.size());
-        assertEquals(TaskStatus.NEW, history.getFirst().getStatus());
+        assertEquals(1, history.size());
         assertEquals(TaskStatus.IN_PROGRESS, history.getLast().getStatus());
     }
 }

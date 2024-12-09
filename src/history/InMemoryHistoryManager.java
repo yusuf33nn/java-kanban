@@ -15,7 +15,13 @@ public class InMemoryHistoryManager implements HistoryManager {
     public static class DoublyLinkedList<T> {
         public Node<T> head;
         public Node<T> tail;
-        private int size = 0;
+
+        public DoublyLinkedList() {
+            head = new Node<>(null, null, null);
+            tail = new Node<>(null, null, null);
+            head.next = tail;
+            tail.prev = head;
+        }
 
         public T getFirst() {
             final Node<T> curHead = head;
@@ -24,20 +30,22 @@ public class InMemoryHistoryManager implements HistoryManager {
             return head.item;
         }
 
-        public void linkLast(T element) {
-            if (head == null) {
-                head = new Node<>(null, element, null);
-                size++;
-            } else if (tail == null) {
-                tail = new Node<>(head, element, null);
-                head.next = tail;
-                size++;
+        public void linkLast(Node<T> node) {
+            if (node == null) {
+                throw new IllegalArgumentException("Node can't be null");
+            }
+
+            if (head.item == null) {
+                head = node;
+                node.next = tail;
+            } else if (tail.item == null) {
+                tail = node;
+                node.prev = head;
             } else {
                 final Node<T> oldTail = tail;
-                final Node<T> newTail = new Node<>(oldTail, element, null);
-                tail = newTail;
-                oldTail.next = newTail;
-                size++;
+                node.prev = oldTail;
+                tail = node;
+                oldTail.next = node;
             }
         }
 
@@ -48,35 +56,46 @@ public class InMemoryHistoryManager implements HistoryManager {
             return tail.item;
         }
 
-        public int size() {
-            return this.size;
-        }
 
         public List<T> getTasks() {
-            List<T> list = new ArrayList<>(size);
+            List<T> list = new ArrayList<>();
             for (Node<T> current = head; current != null; current = current.next) {
-                list.add(current.item);
+                var item = current.item;
+                if (item != null) {
+                    list.add(current.item);
+                }
             }
             return list;
         }
     }
 
-    private final DoublyLinkedList<Task> customLinkedList = new DoublyLinkedList<>();
     private final Map<Long, Node<Task>> taskHistoryMap = new HashMap<>();
+    private final DoublyLinkedList<Task> customLinkedList = new DoublyLinkedList<>();
 
     @Override
     public void add(Task task) {
         Task copy = CopyUtils.copyForHistory(task);
-        customLinkedList.linkLast(copy);
-        customLinkedList.size++;
-        taskHistoryMap.put(task.getId(), customLinkedList.tail);
+
+        Long taskId = task.getId();
+        if (taskHistoryMap.containsKey(taskId)) {
+            removeNode(taskHistoryMap.get(taskId));
+        }
+        var newNode = new Node<>(null, copy, null);
+        customLinkedList.linkLast(newNode);
+        taskHistoryMap.put(taskId, newNode);
     }
 
     @Override
     public void remove(long id) {
         var node = taskHistoryMap.remove(id);
         removeNode(node);
-        customLinkedList.size--;
+    }
+
+    @Override
+    public void removeAllHistory() {
+        customLinkedList.head = null;
+        customLinkedList.tail = null;
+        taskHistoryMap.clear();
     }
 
     @Override
@@ -102,7 +121,6 @@ public class InMemoryHistoryManager implements HistoryManager {
             node.next = null;
         }
         node.item = null;
-        customLinkedList.size--;
     }
 
 }
