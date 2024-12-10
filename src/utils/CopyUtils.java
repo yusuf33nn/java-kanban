@@ -4,7 +4,7 @@ import models.Epic;
 import models.Subtask;
 import models.Task;
 
-public class CopyUtils{
+public class CopyUtils {
 
     public static Task copyForHistory(Task task) {
 
