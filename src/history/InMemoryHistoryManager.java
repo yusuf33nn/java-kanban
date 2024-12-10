@@ -30,23 +30,16 @@ public class InMemoryHistoryManager implements HistoryManager {
             return head.item;
         }
 
-        public void linkLast(Node<T> node) {
-            if (node == null) {
+        public void linkLast(Node<T> newNode) {
+            if (newNode == null) {
                 throw new IllegalArgumentException("Node can't be null");
             }
 
-            if (head.item == null) {
-                head = node;
-                node.next = tail;
-            } else if (tail.item == null) {
-                tail = node;
-                node.prev = head;
-            } else {
-                final Node<T> oldTail = tail;
-                node.prev = oldTail;
-                tail = node;
-                oldTail.next = node;
-            }
+            final Node<T> oldPrev = tail.prev;
+            oldPrev.next = newNode;
+            newNode.prev = oldPrev;
+            newNode.next = tail;
+            tail.prev = newNode;
         }
 
         public T getLast() {
@@ -93,8 +86,8 @@ public class InMemoryHistoryManager implements HistoryManager {
 
     @Override
     public void removeAllHistory() {
-        customLinkedList.head = null;
-        customLinkedList.tail = null;
+        customLinkedList.head.next = customLinkedList.tail;
+        customLinkedList.tail.prev = customLinkedList.head;
         taskHistoryMap.clear();
     }
 
