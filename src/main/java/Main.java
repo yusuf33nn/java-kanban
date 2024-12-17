@@ -1,8 +1,12 @@
+import manager.FileBackedTaskManager;
 import manager.TaskManager;
 import models.Epic;
 import models.Subtask;
 import models.Task;
 import utils.Managers;
+
+import java.nio.file.Files;
+import java.nio.file.Path;
 
 public class Main {
 
@@ -67,5 +71,16 @@ public class Main {
         taskManager.getHistoryManager()
                 .getHistory()
                 .forEach(System.out::println);
+
+        Path path = Path.of("src/main/resources/tasks.csv");
+        TaskManager fileBackedTaskManager;
+        if (Files.exists(path)) {
+            fileBackedTaskManager = Managers.loadFromFile(path.toFile());
+        } else {
+            fileBackedTaskManager = new FileBackedTaskManager(path);
+        }
+
+        Task taskCSV = new Task("task1", "task1_desc1");
+        fileBackedTaskManager.createNewTask(task1);
     }
 }
