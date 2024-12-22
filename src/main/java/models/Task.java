@@ -17,6 +17,13 @@ public class Task {
         this.status = TaskStatus.NEW;
     }
 
+    public Task(long id, String name, String description, TaskStatus status) {
+        this.id = id;
+        this.name = name;
+        this.description = description;
+        this.status = status;
+    }
+
     public long getId() {
         return id;
     }
@@ -77,5 +84,12 @@ public class Task {
                 ", description='" + description + '\'' +
                 ", status=" + status +
                 '}';
+    }
+
+    public String toString(Task task) {
+        /*TODO я не понимаю как здесь сделать без instanceOf????
+          TODO и вообще я правильное место выбрал для метода?
+        */
+        return null;
     }
 }

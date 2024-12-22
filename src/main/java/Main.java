@@ -1,18 +1,19 @@
-import manager.FileBackedTaskManager;
 import manager.TaskManager;
 import models.Epic;
 import models.Subtask;
 import models.Task;
-import utils.Managers;
 
-import java.nio.file.Files;
-import java.nio.file.Path;
+import java.io.File;
+
+import static manager.FileBackedTaskManager.loadFromFile;
 
 public class Main {
 
     public static void main(String[] args) {
 
-        TaskManager taskManager = Managers.getDefault();
+        //TODO правильно я понял - так надо загружать из файла при запуске?
+        TaskManager taskManager = loadFromFile(new File("src/main/resources/tasks.csv"));
+        //TODO ну из файла он считывает, я продебажил
         Task task1 = new Task("task1", "task1_desc1");
         taskManager.createNewTask(task1);
         Task task2 = new Task("task2", "task2_desc2");
@@ -71,16 +72,5 @@ public class Main {
         taskManager.getHistoryManager()
                 .getHistory()
                 .forEach(System.out::println);
-
-        Path path = Path.of("src/main/resources/tasks.csv");
-        TaskManager fileBackedTaskManager;
-        if (Files.exists(path)) {
-            fileBackedTaskManager = Managers.loadFromFile(path.toFile());
-        } else {
-            fileBackedTaskManager = new FileBackedTaskManager(path);
-        }
-
-        Task taskCSV = new Task("task1", "task1_desc1");
-        fileBackedTaskManager.createNewTask(task1);
     }
 }
