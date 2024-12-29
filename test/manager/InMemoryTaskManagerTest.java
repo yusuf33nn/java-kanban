@@ -3,6 +3,7 @@ package manager;
 import models.Epic;
 import models.Subtask;
 import models.Task;
+import models.TaskType;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import utils.Managers;
@@ -21,7 +22,7 @@ class InMemoryTaskManagerTest {
 
     @Test
     void createNewTask() {
-        Task task = new Task("Test addNewTask", "Test addNewTask description");
+        Task task = new Task("Test addNewTask", "Test addNewTask description", TaskType.TASK);
         final long taskId = taskManager.createNewTask(task).getId();
 
         final Task savedTask = taskManager.getTask(taskId);
@@ -38,7 +39,7 @@ class InMemoryTaskManagerTest {
 
     @Test
     void taskManager_can_add_task() {
-        Task task = new Task("Test addNewTask", "Test addNewTask description");
+        Task task = new Task("Test addNewTask", "Test addNewTask description", TaskType.TASK);
         Task taskWithGeneratedId = taskManager.createNewTask(task);
 
         assertNotNull(taskWithGeneratedId);
@@ -75,7 +76,7 @@ class InMemoryTaskManagerTest {
 
     @Test
     void generatedId_do_not_conflict_with_concrete_id() {
-        Task task = new Task("Test addNewTask", "Test addNewTask description");
+        Task task = new Task("Test addNewTask", "Test addNewTask description", TaskType.TASK);
         long concreteId = 10L;
         task.setId(concreteId);
 
@@ -90,7 +91,7 @@ class InMemoryTaskManagerTest {
     void should_not_change_field_after_adding_into_manager() {
         String name = "Test addNewTask";
         String desc = "Test addNewTask description";
-        Task task = new Task(name, desc);
+        Task task = new Task(name, desc, TaskType.TASK);
 
         Task taskWithGeneratedId = taskManager.createNewTask(task);
 

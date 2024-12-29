@@ -8,9 +8,9 @@ class TaskTest {
 
     @Test
     void tasks_are_equal_if_their_ids_are_equal() {
-        Task task1 = new Task("task1", "desc1");
+        Task task1 = new Task("task1", "desc1", TaskType.TASK);
         task1.setId(5L);
-        Task task2 = new Task("task2", "desc2");
+        Task task2 = new Task("task2", "desc2", TaskType.TASK);
         task2.setId(5L);
 
         assertEquals(task1, task2);
@@ -18,9 +18,9 @@ class TaskTest {
 
     @Test
     void tasks_are_not_equal_if_their_ids_are_not_equal() {
-        Task task1 = new Task("task1", "desc1");
+        Task task1 = new Task("task1", "desc1", TaskType.TASK);
         task1.setId(5L);
-        Task task2 = new Task("task2", "desc2");
+        Task task2 = new Task("task2", "desc2", TaskType.TASK);
         task2.setId(6L);
 
         assertNotEquals(task1, task2);

@@ -3,6 +3,7 @@ package history;
 import enums.TaskStatus;
 import manager.TaskManager;
 import models.Task;
+import models.TaskType;
 import org.junit.jupiter.api.Test;
 import utils.Managers;
 
@@ -15,7 +16,7 @@ class InMemoryHistoryManagerTest {
 
     @Test
     void should_save_task_status_in_history() {
-        Task task1 = new Task("Test addNewTask", "Test addNewTask description");
+        Task task1 = new Task("Test addNewTask", "Test addNewTask description", TaskType.TASK);
         taskManager.createNewTask(task1);
 
         Task retrievedTask1 = taskManager.getTask(task1.getId());
