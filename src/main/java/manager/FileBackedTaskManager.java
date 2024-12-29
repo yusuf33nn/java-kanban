@@ -13,7 +13,6 @@ import java.io.File;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
-import java.nio.file.Files;
 import java.nio.file.Path;
 
 public class FileBackedTaskManager extends InMemoryTaskManager {
@@ -32,17 +31,24 @@ public class FileBackedTaskManager extends InMemoryTaskManager {
     }
 
     private void save() {
-        if (Files.notExists(path)) {
-            try(BufferedWriter bw = new BufferedWriter(new FileWriter(path.toFile()))) {
-                Files.createFile(path);
-                bw.write("id,type,name,status,description,epic\n");
-            } catch (IOException e) {
-                throw new ManagerSaveException("Error while creating new csv file");
-            }
-        }
-        //TODO Я правильно понял, что после каждого update, добавления записи - мне надо очищать файл и добавлять всё по новой?
-        // сомнительное решение
+        try(BufferedWriter bw = new BufferedWriter(new FileWriter(path.toFile(), false))) {
+            bw.write("id,type,name,status,description,epic\n");
 
+            for (Task task : getAllTasks()) {
+                bw.write(task.toString() + ",\n");
+            }
+
+            for (Epic epic : getAllEpics()) {
+                bw.write(epic.toString() + ",\n");
+            }
+
+            for (Subtask subtask : getAllSubtasks()) {
+                bw.write(subtask.toString() + "," + subtask.getEpic().getId() + "\n");
+            }
+
+        } catch (IOException e) {
+            throw new ManagerSaveException("Error while saving file");
+        }
     }
 
     @Override
@@ -87,9 +93,6 @@ public class FileBackedTaskManager extends InMemoryTaskManager {
         save();
     }
 
-
-
-
     private Task fromString(String value) {
 
         String[] fields = value.split(",");
@@ -99,7 +102,7 @@ public class FileBackedTaskManager extends InMemoryTaskManager {
         var taskDesc = fields[4];
         var taskStatus = TaskStatus.valueOf(fields[3].toUpperCase());
         return switch (taskType) {
-            case TASK -> new Task(taskId, taskName, taskDesc, taskStatus);
+            case TASK -> new Task(taskId, taskName, taskDesc, TaskType.TASK, taskStatus);
             case SUBTASK -> {
                 var epicId = Long.parseLong(fields[5]);
                 var epic = this.getEpic(epicId);
@@ -123,6 +126,9 @@ public class FileBackedTaskManager extends InMemoryTaskManager {
             }
         } catch (IOException e) {
             System.out.println("Произошла ошибка во время чтения файла.");
+        } catch (Exception e) {
+            System.out.println("Произошла непредвиденная ошибка");
+            throw e;
         }
         return taskManager;
     }

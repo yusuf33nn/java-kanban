@@ -2,6 +2,7 @@ import manager.TaskManager;
 import models.Epic;
 import models.Subtask;
 import models.Task;
+import models.TaskType;
 
 import java.io.File;
 
@@ -11,12 +12,10 @@ public class Main {
 
     public static void main(String[] args) {
 
-        //TODO правильно я понял - так надо загружать из файла при запуске?
         TaskManager taskManager = loadFromFile(new File("src/main/resources/tasks.csv"));
-        //TODO ну из файла он считывает, я продебажил
-        Task task1 = new Task("task1", "task1_desc1");
+        Task task1 = new Task("task1", "task1_desc1", TaskType.TASK);
         taskManager.createNewTask(task1);
-        Task task2 = new Task("task2", "task2_desc2");
+        Task task2 = new Task("task2", "task2_desc2", TaskType.TASK);
         taskManager.createNewTask(task2);
 
         Epic epic1 = new Epic("epic1", "epic1_desc1");

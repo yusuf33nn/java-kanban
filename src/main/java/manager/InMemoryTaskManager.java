@@ -39,13 +39,8 @@ public class InMemoryTaskManager implements TaskManager {
 
     @Override
     public Task createNewTask(Task task) {
-        long taskId = task.getId();
-        if (taskId == 0) {
-            taskId = ++TASK_ID_COUNTER;
-            task.setId(taskId);
-        } else {
-            TASK_ID_COUNTER++;
-        }
+        long taskId = ++TASK_ID_COUNTER;
+        task.setId(taskId);
 
         if (task instanceof Subtask subtask) {
             subtaskMap.put(taskId, subtask);

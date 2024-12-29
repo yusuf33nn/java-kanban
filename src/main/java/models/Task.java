@@ -8,19 +8,28 @@ public class Task {
     private long id;
     private String name;
     private String description;
+    private final TaskType taskType;
     private TaskStatus status;
 
 
-    public Task(String name, String description) {
+    public Task(String name, String description, TaskType taskType) {
         this.name = name;
         this.description = description;
+        this.taskType = taskType;
         this.status = TaskStatus.NEW;
     }
 
-    public Task(long id, String name, String description, TaskStatus status) {
+    public TaskType getTaskType() {
+        return taskType;
+    }
+
+
+
+    public Task(long id, String name, String description, TaskType taskType, TaskStatus status) {
         this.id = id;
         this.name = name;
         this.description = description;
+        this.taskType = taskType;
         this.status = status;
     }
 
@@ -70,7 +79,7 @@ public class Task {
     }
 
     public Task copy() {
-        Task copy = new Task(this.name, this.description);
+        Task copy = new Task(this.name, this.description, this.taskType);
         copy.setId(this.id);
         copy.setStatus(this.status);
         return copy;
@@ -78,18 +87,6 @@ public class Task {
 
     @Override
     public String toString() {
-        return "Task{" +
-                "id=" + id +
-                ", name='" + name + '\'' +
-                ", description='" + description + '\'' +
-                ", status=" + status +
-                '}';
-    }
-
-    public String toString(Task task) {
-        /*TODO я не понимаю как здесь сделать без instanceOf????
-          TODO и вообще я правильное место выбрал для метода?
-        */
-        return null;
+        return "%d,%s,%s,%s,%s".formatted(id, taskType.toString(), name, status.toString(), description);
     }
 }
