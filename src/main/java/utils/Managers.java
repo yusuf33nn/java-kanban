@@ -2,8 +2,11 @@ package utils;
 
 import history.HistoryManager;
 import history.InMemoryHistoryManager;
+import manager.FileBackedTaskManager;
 import manager.InMemoryTaskManager;
 import manager.TaskManager;
+
+import java.nio.file.Path;
 
 public class Managers {
 
@@ -12,10 +15,15 @@ public class Managers {
     }
 
     public static TaskManager getDefault() {
+        return new FileBackedTaskManager(Path.of("src/main/resources/tasks.csv"));
+    }
+
+    public static TaskManager getInMemoryTaskManager() {
         return new InMemoryTaskManager();
     }
 
     public static HistoryManager getDefaultHistory() {
         return new InMemoryHistoryManager();
     }
+
 }

@@ -2,16 +2,20 @@ import manager.TaskManager;
 import models.Epic;
 import models.Subtask;
 import models.Task;
-import utils.Managers;
+import models.TaskType;
+
+import java.io.File;
+
+import static manager.FileBackedTaskManager.loadFromFile;
 
 public class Main {
 
     public static void main(String[] args) {
 
-        TaskManager taskManager = Managers.getDefault();
-        Task task1 = new Task("task1", "task1_desc1");
+        TaskManager taskManager = loadFromFile(new File("src/main/resources/tasks.csv"));
+        Task task1 = new Task("task1", "task1_desc1", TaskType.TASK);
         taskManager.createNewTask(task1);
-        Task task2 = new Task("task2", "task2_desc2");
+        Task task2 = new Task("task2", "task2_desc2", TaskType.TASK);
         taskManager.createNewTask(task2);
 
         Epic epic1 = new Epic("epic1", "epic1_desc1");
