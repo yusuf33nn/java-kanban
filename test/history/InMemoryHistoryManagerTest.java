@@ -12,7 +12,7 @@ import java.util.List;
 import static org.junit.jupiter.api.Assertions.*;
 
 class InMemoryHistoryManagerTest {
-    private final TaskManager taskManager = Managers.getDefault();
+    private final TaskManager taskManager = Managers.getInMemoryTaskManager();
 
     @Test
     void should_save_task_status_in_history() {
