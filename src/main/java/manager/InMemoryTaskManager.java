@@ -6,11 +6,13 @@ import models.Subtask;
 import models.Task;
 import utils.Managers;
 
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
+import java.util.TreeSet;
 
 
 public class InMemoryTaskManager implements TaskManager {
@@ -21,6 +23,8 @@ public class InMemoryTaskManager implements TaskManager {
     private final Map<Long, Task> taskMap = new HashMap<>();
     private final Map<Long, Subtask> subtaskMap = new HashMap<>();
     private final Map<Long, Epic> epicMap = new HashMap<>();
+
+    private final Set<Task> prioritizedTasks = new TreeSet<>(Comparator.comparing(Task::getStartTime));
 
     @Override
     public List<Task> getAllTasks() {
@@ -46,14 +50,37 @@ public class InMemoryTaskManager implements TaskManager {
             subtaskMap.put(taskId, subtask);
             var epic = subtask.getEpic();
             epic.getSubtasks().add(subtask);
-            epic.calculateEpicStatus();
+            epic.calculateEpic();
+            addPriorityTask(subtask);
             return subtask;
         } else if (task instanceof Epic epic) {
             epicMap.put(taskId, epic);
             return epic;
         } else {
             taskMap.put(taskId, task);
+            addPriorityTask(task);
             return task;
+        }
+    }
+
+    //TODO Что за метод add()? имелось ввиду createNewTask(Task task)?
+
+    /*
+    TODO ну создам я метод validate(), а дальше что?
+     если validate возвращает true - мне создавать Task?
+     а если вернёт false - то мне выбросить исключение или что?
+    */
+
+    public boolean validateTimeCrossing(Task newtask) {
+
+        return getPrioritizedTasks().stream()
+                .anyMatch(pt -> (newtask.getStartTime().isEqual(pt.getStartTime()) || newtask.getStartTime().isBefore(pt.getStartTime()))
+                        && newtask.getEndTime().isBefore(pt.getEndTime()));
+    }
+
+    private void addPriorityTask(Task task) {
+        if (task.getStartTime() != null) {
+            prioritizedTasks.add(task);
         }
     }
 
@@ -90,10 +117,10 @@ public class InMemoryTaskManager implements TaskManager {
             subtaskMap.put(taskId, updatedSubtask);
             var epic = updatedSubtask.getEpic();
             epic.updateSubtasks(updatedSubtask);
-            epic.calculateEpicStatus();
+            epic.calculateEpic();
         } else if (epicMap.containsKey(taskId)) {
             Epic updatedEpic = (Epic) updatedTask;
-            updatedEpic.calculateEpicStatus();
+            updatedEpic.calculateEpic();
             epicMap.put(taskId, updatedEpic);
         } else {
             throw new RuntimeException("Task with id = %d doesn't not exist".formatted(taskId));
@@ -141,6 +168,9 @@ public class InMemoryTaskManager implements TaskManager {
         return epic;
     }
 
+    public Set<Task> getPrioritizedTasks() {
+        return prioritizedTasks;
+    }
     @Override
     public HistoryManager getHistoryManager() {
         return historyManager;
@@ -157,39 +187,33 @@ public class InMemoryTaskManager implements TaskManager {
         historyManager.remove(subtaskId);
         var epic = subtask.getEpic();
         epic.getSubtasks().remove(subtask);
-        epic.calculateEpicStatus();
+        epic.calculateEpic();
     }
 
     public void removeEpic(long epicId) {
         List<Long> subtasksToBeDeleted = epicMap.get(epicId).getSubtasks().stream().map(Task::getId).toList();
         epicMap.remove(epicId);
         historyManager.remove(epicId);
-        for (Long subtaskId : subtasksToBeDeleted) {
+
+        subtasksToBeDeleted.forEach(subtaskId -> {
             subtaskMap.remove(subtaskId);
             historyManager.remove(subtaskId);
-        }
+        });
     }
 
     public void removeTasks() {
-        Set<Long> tasks = taskMap.keySet();
-        for (Long taskId : tasks) {
-            taskMap.remove(taskId);
-            historyManager.remove(taskId);
-        }
+        taskMap.keySet().forEach(e -> {
+            taskMap.remove(e);
+            historyManager.remove(e);
+        });
     }
 
     public void removeSubtasks() {
-        Set<Long> subtaskIds = subtaskMap.keySet();
-        for (Long subtaskId : subtaskIds) {
-            removeSubtask(subtaskId);
-        }
+        subtaskMap.keySet().forEach(this::removeSubtask);
     }
 
     public void removeEpics() {
-        Set<Long> epicIds = epicMap.keySet();
-        for (Long epicId : epicIds) {
-            removeEpic(epicId);
-        }
+        epicMap.keySet().forEach(this::removeEpic);
     }
 
     public void removeAllTasks() {
