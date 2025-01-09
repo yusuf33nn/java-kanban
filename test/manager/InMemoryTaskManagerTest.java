@@ -8,6 +8,8 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import utils.Managers;
 
+import java.time.Duration;
+import java.time.LocalDateTime;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -22,7 +24,7 @@ class InMemoryTaskManagerTest {
 
     @Test
     void createNewTask() {
-        Task task = new Task("Test addNewTask", "Test addNewTask description", TaskType.TASK);
+        Task task = new Task("Test addNewTask", "Test addNewTask description", TaskType.TASK, LocalDateTime.now(), Duration.ofMinutes(400));
         final long taskId = taskManager.createNewTask(task).getId();
 
         final Task savedTask = taskManager.getTask(taskId);
@@ -39,7 +41,7 @@ class InMemoryTaskManagerTest {
 
     @Test
     void taskManager_can_add_task() {
-        Task task = new Task("Test addNewTask", "Test addNewTask description", TaskType.TASK);
+        Task task = new Task("Test addNewTask", "Test addNewTask description", TaskType.TASK, LocalDateTime.now(), Duration.ofMinutes(400));
         Task taskWithGeneratedId = taskManager.createNewTask(task);
 
         assertNotNull(taskWithGeneratedId);
@@ -50,8 +52,8 @@ class InMemoryTaskManagerTest {
 
     @Test
     void taskManager_can_add_subtask() {
-        Subtask subtask = new Subtask("Test addNewTask", "Test addNewTask description");
-        Epic epic = new Epic("test_epic", "test_desc");
+        Subtask subtask = new Subtask("Test addNewTask", "Test addNewTask description", LocalDateTime.now(), Duration.ofMinutes(200));
+        Epic epic = new Epic("test_epic", "test_desc", LocalDateTime.now(), Duration.ZERO);
         taskManager.createNewTask(epic);
         subtask.setEpic(epic);
         Task taskWithGeneratedId = taskManager.createNewTask(subtask);
@@ -64,7 +66,7 @@ class InMemoryTaskManagerTest {
 
     @Test
     void taskManager_can_add_epic() {
-        Epic epic = new Epic("test_epic", "test_desc");
+        Epic epic = new Epic("test_epic", "test_desc", LocalDateTime.now(), Duration.ZERO);
 
         Task taskWithGeneratedId = taskManager.createNewTask(epic);
 
@@ -76,7 +78,7 @@ class InMemoryTaskManagerTest {
 
     @Test
     void generatedId_do_not_conflict_with_concrete_id() {
-        Task task = new Task("Test addNewTask", "Test addNewTask description", TaskType.TASK);
+        Task task = new Task("Test addNewTask", "Test addNewTask description", TaskType.TASK, LocalDateTime.now(), Duration.ofMinutes(400));
         long concreteId = 10L;
         task.setId(concreteId);
 
@@ -91,7 +93,7 @@ class InMemoryTaskManagerTest {
     void should_not_change_field_after_adding_into_manager() {
         String name = "Test addNewTask";
         String desc = "Test addNewTask description";
-        Task task = new Task(name, desc, TaskType.TASK);
+        Task task = new Task(name, desc, TaskType.TASK, LocalDateTime.now(), Duration.ofMinutes(400));
 
         Task taskWithGeneratedId = taskManager.createNewTask(task);
 

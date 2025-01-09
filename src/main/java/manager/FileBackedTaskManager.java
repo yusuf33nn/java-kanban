@@ -34,7 +34,7 @@ public class FileBackedTaskManager extends InMemoryTaskManager {
 
     private void save() {
         try (BufferedWriter bw = new BufferedWriter(new FileWriter(path.toFile(), false))) {
-            bw.write("id,type,name,status,description,epic\n");
+            bw.write("id,type,name,status,description,startTime,duration,epic\n");
 
             for (Task task : getAllTasks()) {
                 bw.write(task.toString() + ",\n");
@@ -108,7 +108,7 @@ public class FileBackedTaskManager extends InMemoryTaskManager {
         return switch (taskType) {
             case TASK -> new Task(id, name, desc, TaskType.TASK, taskStatus, startTime, duration);
             case SUBTASK -> {
-                var epicId = Long.parseLong(fields[5]);
+                var epicId = Long.parseLong(fields[7]);
                 var epic = this.getEpic(epicId);
                 yield new Subtask(id, name, desc, taskStatus, epic, startTime, duration);
             }

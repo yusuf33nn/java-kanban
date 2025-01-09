@@ -1,5 +1,6 @@
 package manager;
 
+import exception.ManagerSaveException;
 import history.HistoryManager;
 import models.Epic;
 import models.Subtask;
@@ -51,31 +52,35 @@ public class InMemoryTaskManager implements TaskManager {
             var epic = subtask.getEpic();
             epic.getSubtasks().add(subtask);
             epic.calculateEpic();
-            addPriorityTask(subtask);
+
+            if (canBePriorityTask(subtask)) {
+                addPriorityTask(subtask);
+            }
             return subtask;
         } else if (task instanceof Epic epic) {
             epicMap.put(taskId, epic);
             return epic;
         } else {
             taskMap.put(taskId, task);
-            addPriorityTask(task);
+
+            if (canBePriorityTask(task)) {
+                addPriorityTask(task);
+            }
             return task;
         }
     }
 
-    //TODO Что за метод add()? имелось ввиду createNewTask(Task task)?
-
-    /*
-    TODO ну создам я метод validate(), а дальше что?
-     если validate возвращает true - мне создавать Task?
-     а если вернёт false - то мне выбросить исключение или что?
-    */
-
-    public boolean validateTimeCrossing(Task newtask) {
-
-        return getPrioritizedTasks().stream()
-                .anyMatch(pt -> (newtask.getStartTime().isEqual(pt.getStartTime()) || newtask.getStartTime().isBefore(pt.getStartTime()))
-                        && newtask.getEndTime().isBefore(pt.getEndTime()));
+    public boolean canBePriorityTask(Task newtask) {
+        getPrioritizedTasks().stream()
+                .filter(pt -> (newtask.getStartTime().isEqual(pt.getStartTime())
+                        || newtask.getStartTime().isBefore(pt.getStartTime()))
+                        && newtask.getEndTime().isBefore(pt.getEndTime()))
+                .findAny()
+                .ifPresent(crossingTask -> {
+                    throw new ManagerSaveException("New Task with ID = %d is crossing existing task with ID = %d"
+                            .formatted(newtask.getId(), crossingTask.getId()));
+                });
+        return true;
     }
 
     private void addPriorityTask(Task task) {

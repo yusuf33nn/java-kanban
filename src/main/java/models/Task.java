@@ -5,6 +5,7 @@ import enums.TaskStatus;
 import java.time.Duration;
 import java.time.LocalDateTime;
 import java.util.Objects;
+import java.util.Optional;
 
 public class Task {
     private long id;
@@ -120,7 +121,9 @@ public class Task {
 
     @Override
     public String toString() {
-        return "%d,%s,%s,%s,%s,%s,%d".formatted(id, taskType.toString(), name, status.toString(), description, startTime, duration.toMinutes());
+        var durationForRecord = Optional.ofNullable(duration).map(Duration::toMinutes).orElse(0L);
+        return "%d,%s,%s,%s,%s,%s,%d"
+                .formatted(id, taskType.toString(), name, status.toString(), description, startTime, durationForRecord);
     }
 
     public LocalDateTime getEndTime() {
