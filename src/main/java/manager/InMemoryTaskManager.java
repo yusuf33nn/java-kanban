@@ -14,6 +14,7 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import java.util.TreeSet;
+import java.util.function.Predicate;
 
 
 public class InMemoryTaskManager implements TaskManager {
@@ -68,16 +69,21 @@ public class InMemoryTaskManager implements TaskManager {
         }
     }
 
+    @Override
     public void validateTimeCrossing(Task newtask) {
         getPrioritizedTasks().stream()
-                .filter(pt -> (newtask.getStartTime().isEqual(pt.getStartTime())
-                        || newtask.getStartTime().isBefore(pt.getStartTime()))
-                        && newtask.getEndTime().isBefore(pt.getEndTime()))
+                .filter(overlappingWith(newtask))
                 .findAny()
                 .ifPresent(crossingTask -> {
                     throw new ManagerSaveException("New Task with ID = %d is crossing existing task with ID = %d"
                             .formatted(newtask.getId(), crossingTask.getId()));
                 });
+    }
+
+    public static Predicate<Task> overlappingWith(Task newtask) {
+        return existingTask ->
+                !existingTask.getStartTime().isAfter(newtask.getEndTime())
+                        && !existingTask.getEndTime().isBefore(newtask.getStartTime());
     }
 
     private void addPriorityTask(Task task) {

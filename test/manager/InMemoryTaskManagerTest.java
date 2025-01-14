@@ -1,5 +1,6 @@
 package manager;
 
+import exception.ManagerSaveException;
 import models.Epic;
 import models.Subtask;
 import models.Task;
@@ -103,5 +104,26 @@ class InMemoryTaskManagerTest {
 
         assertEquals(name, foundTaskById.getName());
         assertEquals(desc, foundTaskById.getDescription());
+    }
+
+    @Test
+    void should_throw_managerException() {
+        Task task1 = new Task("task1", "task1_desc1", TaskType.TASK, LocalDateTime.now(), Duration.ofMinutes(400));
+        taskManager.createNewTask(task1);
+        Task task2 = new Task("task2", "task2_desc2", TaskType.TASK, LocalDateTime.now(), Duration.ofMinutes(300));
+
+        var exception = assertThrows(ManagerSaveException.class, () -> taskManager.createNewTask(task2));
+
+        assertEquals("New Task with ID = %d is crossing existing task with ID = %d".formatted(2L, 1L),
+                exception.getMessage());
+    }
+
+    @Test
+    void should_not_throw_managerException() {
+        Task task1 = new Task("task1", "task1_desc1", TaskType.TASK, LocalDateTime.now(), Duration.ofMinutes(400));
+        taskManager.createNewTask(task1);
+        Task task2 = new Task("task2", "task2_desc2", TaskType.TASK, LocalDateTime.now().plusDays(5), Duration.ofMinutes(300));
+
+        assertDoesNotThrow(() -> taskManager.createNewTask(task2));
     }
 }
