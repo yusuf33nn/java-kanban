@@ -7,16 +7,24 @@ import models.Task;
 import models.TaskType;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import utils.Managers;
 
 import java.time.Duration;
 import java.time.LocalDateTime;
 import java.util.List;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
-class InMemoryTaskManagerTest {
-    private final TaskManager taskManager = Managers.getInMemoryTaskManager();
+public abstract class TaskManagerTest<T extends TaskManager> {
+
+    private final T taskManager;
+
+    public TaskManagerTest(T taskManager) {
+        this.taskManager = taskManager;
+    }
 
     @BeforeEach
     void setUp() {
