@@ -14,6 +14,8 @@ import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.nio.file.Path;
+import java.time.Duration;
+import java.time.LocalDateTime;
 
 public class FileBackedTaskManager extends InMemoryTaskManager {
 
@@ -32,7 +34,7 @@ public class FileBackedTaskManager extends InMemoryTaskManager {
 
     private void save() {
         try (BufferedWriter bw = new BufferedWriter(new FileWriter(path.toFile(), false))) {
-            bw.write("id,type,name,status,description,epic\n");
+            bw.write("id,type,name,status,description,startTime,duration,epic\n");
 
             for (Task task : getAllTasks()) {
                 bw.write(task.toString() + ",\n");
@@ -96,19 +98,21 @@ public class FileBackedTaskManager extends InMemoryTaskManager {
     private Task fromString(String value) {
 
         String[] fields = value.split(",");
-        var taskId = Long.parseLong(fields[0]);
+        var id = Long.parseLong(fields[0]);
         var taskType = TaskType.valueOf(fields[1].toUpperCase());
-        var taskName = fields[2];
-        var taskDesc = fields[4];
+        var name = fields[2];
+        var desc = fields[4];
         var taskStatus = TaskStatus.valueOf(fields[3].toUpperCase());
+        var startTime = LocalDateTime.parse(fields[5]);
+        var duration = Duration.ofMinutes(Long.parseLong(fields[6]));
         return switch (taskType) {
-            case TASK -> new Task(taskId, taskName, taskDesc, TaskType.TASK, taskStatus);
+            case TASK -> new Task(id, name, desc, TaskType.TASK, taskStatus, startTime, duration);
             case SUBTASK -> {
-                var epicId = Long.parseLong(fields[5]);
+                var epicId = Long.parseLong(fields[7]);
                 var epic = this.getEpic(epicId);
-                yield new Subtask(taskId, taskName, taskDesc, taskStatus, epic);
+                yield new Subtask(id, name, desc, taskStatus, epic, startTime, duration);
             }
-            case EPIC -> new Epic(taskId, taskName, taskDesc, taskStatus);
+            case EPIC -> new Epic(id, name, desc, taskStatus, startTime, duration);
         };
     }
 

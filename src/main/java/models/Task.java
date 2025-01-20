@@ -2,7 +2,10 @@ package models;
 
 import enums.TaskStatus;
 
+import java.time.Duration;
+import java.time.LocalDateTime;
 import java.util.Objects;
+import java.util.Optional;
 
 public class Task {
     private long id;
@@ -10,27 +13,38 @@ public class Task {
     private String description;
     private final TaskType taskType;
     private TaskStatus status;
+    private LocalDateTime startTime;
+    private Duration duration;
 
 
-    public Task(String name, String description, TaskType taskType) {
+
+    public Task(String name,
+                String description,
+                TaskType taskType,
+                LocalDateTime startTime,
+                Duration duration) {
         this.name = name;
         this.description = description;
         this.taskType = taskType;
         this.status = TaskStatus.NEW;
+        this.startTime = startTime;
+        this.duration = duration;
     }
 
-    public TaskType getTaskType() {
-        return taskType;
-    }
-
-
-
-    public Task(long id, String name, String description, TaskType taskType, TaskStatus status) {
+    public Task(long id,
+                String name,
+                String description,
+                TaskType taskType,
+                TaskStatus status,
+                LocalDateTime startTime,
+                Duration duration) {
         this.id = id;
         this.name = name;
         this.description = description;
         this.taskType = taskType;
         this.status = status;
+        this.startTime = startTime;
+        this.duration = duration;
     }
 
     public long getId() {
@@ -65,6 +79,26 @@ public class Task {
         this.status = status;
     }
 
+    public TaskType getTaskType() {
+        return taskType;
+    }
+
+    public Duration getDuration() {
+        return duration;
+    }
+
+    public void setDuration(Duration duration) {
+        this.duration = duration;
+    }
+
+    public LocalDateTime getStartTime() {
+        return startTime;
+    }
+
+    public void setStartTime(LocalDateTime startTime) {
+        this.startTime = startTime;
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
@@ -79,7 +113,7 @@ public class Task {
     }
 
     public Task copy() {
-        Task copy = new Task(this.name, this.description, this.taskType);
+        Task copy = new Task(this.name, this.description, this.taskType, this.startTime, this.duration);
         copy.setId(this.id);
         copy.setStatus(this.status);
         return copy;
@@ -87,6 +121,12 @@ public class Task {
 
     @Override
     public String toString() {
-        return "%d,%s,%s,%s,%s".formatted(id, taskType.toString(), name, status.toString(), description);
+        var durationForRecord = Optional.ofNullable(duration).map(Duration::toMinutes).orElse(0L);
+        return "%d,%s,%s,%s,%s,%s,%d"
+                .formatted(id, taskType.toString(), name, status.toString(), description, startTime, durationForRecord);
+    }
+
+    public LocalDateTime getEndTime() {
+        return startTime.plus(duration);
     }
 }
