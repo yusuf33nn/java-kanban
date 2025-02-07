@@ -32,6 +32,10 @@ public class FileBackedTaskManager extends InMemoryTaskManager {
         return newTask;
     }
 
+    public Path getPath() {
+        return path;
+    }
+
     private void save() {
         try (BufferedWriter bw = new BufferedWriter(new FileWriter(path.toFile(), false))) {
             bw.write("id,type,name,status,description,startTime,duration,epic\n");
