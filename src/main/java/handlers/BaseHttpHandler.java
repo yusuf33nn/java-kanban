@@ -3,10 +3,17 @@ package handlers;
 import com.google.gson.Gson;
 import com.sun.net.httpserver.HttpExchange;
 import com.sun.net.httpserver.HttpHandler;
+import exception.ManagerSaveException;
 import manager.TaskManager;
+import models.Epic;
+import models.Subtask;
+import models.Task;
 
 import java.io.IOException;
+import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
+import java.util.List;
+
 
 public class BaseHttpHandler implements HttpHandler {
     private static final int OK = 200;
@@ -18,6 +25,8 @@ public class BaseHttpHandler implements HttpHandler {
     public static final String GET_METHOD = "GET";
     public static final String POST_METHOD = "POST";
     public static final String DELETE_METHOD = "DELETE";
+
+    private static final Charset DEFAULT_CHARSET = StandardCharsets.UTF_8;
 
     protected final Gson gson;
     protected final TaskManager taskManager;
@@ -78,6 +87,59 @@ public class BaseHttpHandler implements HttpHandler {
             return Long.parseLong(id);
         } catch (NumberFormatException e) {
             throw new RuntimeException(e.getMessage());
+        }
+    }
+
+    protected void getAll(HttpExchange exchange, Class<? extends Task> tClass) {
+        try {
+            List<? extends Task> tasks;
+            if (tClass.equals(Task.class)) {
+                tasks = taskManager.getAllTasks();
+            } else if (tClass.equals(Subtask.class)) {
+                tasks = taskManager.getAllSubtasks();
+            } else if (tClass.equals(Epic.class)) {
+                tasks = taskManager.getAllEpics();
+            } else {
+                throw new IllegalArgumentException("Неизвестный тип задачи: " + tClass);
+            }
+            var resp = gson.toJson(tasks);
+            sendOk(exchange, resp);
+        } catch (Exception e) {
+            sendError(exchange, e);
+        }
+    }
+
+    protected void getById(HttpExchange exchange) {
+        try {
+            long id = retrieveIdFromPath(exchange);
+            Task task = taskManager.getById(id);
+            var resp = gson.toJson(task);
+            sendOk(exchange, resp);
+        } catch (Exception e) {
+            sendError(exchange, e);
+        }
+    }
+
+    protected void deleteById(HttpExchange exchange) {
+        try {
+            long taskId = retrieveIdFromPath(exchange);
+            taskManager.removeById(taskId);
+            sendOk(exchange, "");
+        } catch (Exception e) {
+            sendError(exchange, e);
+        }
+    }
+
+    protected void createOrUpdateTask(HttpExchange exchange, Class<? extends Task> tClass) {
+        try {
+            String requestBody = new String(exchange.getRequestBody().readAllBytes(), DEFAULT_CHARSET);
+            Task task = gson.fromJson(requestBody, tClass);
+            taskManager.createNewTask(task);
+            sendCreated(exchange);
+        } catch (ManagerSaveException e) {
+            sendHasInteractions(exchange);
+        } catch (Exception e) {
+            sendError(exchange, e);
         }
     }
 

@@ -102,9 +102,7 @@ public class InMemoryTaskManager implements TaskManager {
         }
 
         if (task == null) {
-            task = Optional.ofNullable(getEpic(taskId))
-                    .orElseThrow(() ->
-                            new RuntimeException("Task with taskId = %d doesn't not exist".formatted(taskId)));
+            task = getEpic(taskId);
         }
         return task;
     }
@@ -165,7 +163,7 @@ public class InMemoryTaskManager implements TaskManager {
                     historyManager.add(task);
                     return task;
                 })
-                .orElseThrow(NotFoundException::new);
+                .orElseThrow(() -> new NotFoundException("Task with taskId = %d doesn't not exist".formatted(taskId)));
 
     }
 
@@ -176,7 +174,8 @@ public class InMemoryTaskManager implements TaskManager {
                     historyManager.add(subtask);
                     return subtask;
                 })
-                .orElseThrow(NotFoundException::new);
+                .orElseThrow(() -> new NotFoundException("Subtask with subtaskId = %d doesn't not exist"
+                        .formatted(subtaskId)));
     }
 
     @Override
@@ -186,7 +185,7 @@ public class InMemoryTaskManager implements TaskManager {
                     historyManager.add(epic);
                     return epic;
                 })
-                .orElseThrow(NotFoundException::new);
+                .orElseThrow(() -> new NotFoundException("Epic with epicId = %d doesn't not exist".formatted(epicId)));
     }
 
     public Set<Task> getPrioritizedTasks() {
