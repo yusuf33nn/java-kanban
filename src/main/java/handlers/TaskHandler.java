@@ -19,7 +19,7 @@ public class TaskHandler extends BaseHttpHandler {
         Endpoint endpoint = getEndpoint(exchange.getRequestURI().getPath(), exchange.getRequestMethod());
 
         switch (endpoint) {
-            case GET_TASK -> getById(exchange);
+            case GET_TASK -> getById(exchange, Task.class);
             case GET_ALL_TASKS -> getAll(exchange, Task.class);
             case POST_TASK, UPDATE_TASK -> createOrUpdateTask(exchange, Task.class);
             case DELETE_TASK -> deleteById(exchange);

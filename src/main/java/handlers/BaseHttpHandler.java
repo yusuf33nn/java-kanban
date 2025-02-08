@@ -109,10 +109,19 @@ public class BaseHttpHandler implements HttpHandler {
         }
     }
 
-    protected void getById(HttpExchange exchange) {
+    protected void getById(HttpExchange exchange, Class<? extends Task> tClass) {
         try {
             long id = retrieveIdFromPath(exchange);
-            Task task = taskManager.getById(id);
+            Task task;
+            if (tClass.equals(Task.class)) {
+                task = taskManager.getTask(id);
+            } else if (tClass.equals(Subtask.class)) {
+                task = taskManager.getSubtask(id);
+            } else if (tClass.equals(Epic.class)) {
+                task = taskManager.getEpic(id);
+            } else {
+                throw new IllegalArgumentException("Неизвестный тип задачи: " + tClass);
+            }
             var resp = gson.toJson(task);
             sendOk(exchange, resp);
         } catch (Exception e) {

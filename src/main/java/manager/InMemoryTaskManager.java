@@ -8,6 +8,7 @@ import models.Subtask;
 import models.Task;
 import utils.Managers;
 
+import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
@@ -52,13 +53,18 @@ public class InMemoryTaskManager implements TaskManager {
         if (task instanceof Subtask subtask) {
             subtaskMap.put(taskId, subtask);
             var epic = subtask.getEpic();
-            epic.getSubtasks().add(subtask);
-            epic.calculateEpic();
+
+            Epic existingEpic = epicMap.get(epic.getId());
+            existingEpic.addSubtask(subtask);
+            existingEpic.calculateEpic();
 
             validateTimeCrossing(subtask);
             addPriorityTask(subtask);
             return subtask;
         } else if (task instanceof Epic epic) {
+            if (epic.getSubtasks() == null) {
+                epic.setSubtasks(new ArrayList<>());
+            }
             epicMap.put(taskId, epic);
             return epic;
         } else {
