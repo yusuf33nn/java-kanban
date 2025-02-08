@@ -9,7 +9,6 @@ public class SubtaskHandler extends BaseHttpHandler {
 
     private static final String basePath = "subtasks";
 
-
     public SubtaskHandler(Gson gson, TaskManager taskManager) {
         super(gson, taskManager);
     }

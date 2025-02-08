@@ -8,11 +8,9 @@ import models.Task;
 public class TaskHandler extends BaseHttpHandler {
     private static final String basePath = "tasks";
 
-
     public TaskHandler(Gson gson, TaskManager taskManager) {
         super(gson, taskManager);
     }
-
 
     @Override
     public void handle(HttpExchange exchange) {

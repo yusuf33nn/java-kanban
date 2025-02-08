@@ -194,6 +194,7 @@ public class InMemoryTaskManager implements TaskManager {
                 .orElseThrow(() -> new NotFoundException("Epic with epicId = %d doesn't not exist".formatted(epicId)));
     }
 
+    @Override
     public Set<Task> getPrioritizedTasks() {
         return prioritizedTasks;
     }
