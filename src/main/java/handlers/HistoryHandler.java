@@ -7,8 +7,10 @@ import manager.TaskManager;
 import java.io.IOException;
 
 public class HistoryHandler extends BaseHttpHandler {
-    public HistoryHandler(TaskManager taskManager) {
-        super(taskManager);
+
+
+    public HistoryHandler(TaskManager taskManager, Gson gson) {
+        super(taskManager, gson);
     }
 
     @Override

@@ -6,37 +6,47 @@ import manager.TaskManager;
 import models.Task;
 
 import java.io.IOException;
+import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 import java.util.List;
 
 public class TaskHandler extends BaseHttpHandler {
     private static final String basePath = "tasks";
+    private static final Charset DEFAULT_CHARSET = StandardCharsets.UTF_8;
 
-    public TaskHandler(TaskManager taskManager) {
-        super(taskManager);
+    public TaskHandler(TaskManager taskManager, Gson gson) {
+        super(taskManager, gson);
     }
+
 
     @Override
     public void handle(HttpExchange exchange) throws IOException {
         Endpoint endpoint = getEndpoint(exchange.getRequestURI().getPath(), exchange.getRequestMethod());
 
         switch (endpoint) {
-            case GET_TASK -> se ;
-            case GET_ALL_TASKS -> ;
-            case POST_TASK -> {
-                this.taskManager.createNewTask(exchange.getRequestBody())
+            case GET_TASK -> throw new RuntimeException() ;
+            case GET_ALL_TASKS -> {
+                List<Task> tasks = taskManager.getAllTasks();
+                var resp = gson.toJson(tasks);
+                try {
+                    sendOk(exchange, resp);
+                } catch (IOException e) {
+                    sendError(exchange, e);
+                }
             }
-            case UPDATE_TASK -> ;
-            case DELETE_TASK -> ;
-            case UNKNOWN -> ;
-        }
-
-        Gson gson = new Gson();
-        List<Task> tasks = this.taskManager.getAllTasks();
-        var resp = gson.toJson(tasks);
-        try {
-            sendText(exchange, resp);
-        } catch (IOException e) {
-            sendError(exchange, e);
+            case POST_TASK -> {
+                String requestBody = new String(exchange.getRequestBody().readAllBytes(), DEFAULT_CHARSET);
+                var task = gson.fromJson(requestBody, Task.class);
+                taskManager.createNewTask(task);
+                try {
+                    sendCreated(exchange);
+                } catch (IOException e) {
+                    sendError(exchange, e);
+                }
+            }
+            case UPDATE_TASK -> throw new RuntimeException();
+            case DELETE_TASK ->throw new RuntimeException() ;
+            case UNKNOWN -> throw new RuntimeException();
         }
     }
 

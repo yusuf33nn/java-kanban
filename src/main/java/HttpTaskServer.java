@@ -1,3 +1,4 @@
+import com.google.gson.Gson;
 import com.sun.net.httpserver.HttpServer;
 import handlers.EpicHandler;
 import handlers.HistoryHandler;
@@ -15,12 +16,13 @@ public class HttpTaskServer {
     public static void main(String[] args) throws IOException {
 
         TaskManager taskManager = Managers.getInMemoryTaskManager();
+        Gson gson = new Gson();
         HttpServer httpServer = HttpServer.create(new InetSocketAddress(PORT), 0);
-        httpServer.createContext("/tasks", new TaskHandler(taskManager));
-        httpServer.createContext("/subtasks", new SubtaskHandler(taskManager));
-        httpServer.createContext("/epics", new EpicHandler(taskManager));
-        httpServer.createContext("/history", new HistoryHandler(taskManager));
-        httpServer.createContext("/prioritized", new PrioritizedHandler(taskManager));
+        httpServer.createContext("/tasks", new TaskHandler(taskManager, gson));
+        httpServer.createContext("/subtasks", new SubtaskHandler(taskManager, gson));
+        httpServer.createContext("/epics", new EpicHandler(taskManager, gson));
+        httpServer.createContext("/history", new HistoryHandler(taskManager, gson));
+        httpServer.createContext("/prioritized", new PrioritizedHandler(taskManager, gson));
         httpServer.start();
         System.out.println("HTTP-сервер запущен на " + PORT + " порту!");
     }

@@ -7,8 +7,9 @@ import manager.TaskManager;
 import java.io.IOException;
 
 public class PrioritizedHandler extends BaseHttpHandler {
-    public PrioritizedHandler(TaskManager taskManager) {
-        super(taskManager);
+
+    public PrioritizedHandler(TaskManager taskManager, Gson gson) {
+        super(taskManager, gson);
     }
 
     @Override

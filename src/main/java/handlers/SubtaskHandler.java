@@ -7,8 +7,10 @@ import manager.TaskManager;
 import java.io.IOException;
 
 public class SubtaskHandler extends BaseHttpHandler {
-    public SubtaskHandler(TaskManager taskManager) {
-        super(taskManager);
+
+
+    public SubtaskHandler(TaskManager taskManager, Gson gson) {
+        super(taskManager, gson);
     }
 
     @Override
