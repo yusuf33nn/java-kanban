@@ -36,7 +36,12 @@ public class TaskHandler extends BaseHttpHandler {
             }
             case POST_TASK -> {
                 String requestBody = new String(exchange.getRequestBody().readAllBytes(), DEFAULT_CHARSET);
-                var task = gson.fromJson(requestBody, Task.class);
+                Task task = null;
+                try {
+                    task = gson.fromJson(requestBody, Task.class);
+                } catch (Exception e) {
+                    sendError(exchange, e);
+                }
                 taskManager.createNewTask(task);
                 try {
                     sendCreated(exchange);

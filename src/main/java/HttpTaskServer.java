@@ -1,4 +1,6 @@
+import adapters.LocalDateTimeAdapter;
 import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
 import com.sun.net.httpserver.HttpServer;
 import handlers.EpicHandler;
 import handlers.HistoryHandler;
@@ -10,13 +12,16 @@ import utils.Managers;
 
 import java.io.IOException;
 import java.net.InetSocketAddress;
+import java.time.LocalDateTime;
 
 public class HttpTaskServer {
     private static final int PORT = 8080;
     public static void main(String[] args) throws IOException {
 
         TaskManager taskManager = Managers.getInMemoryTaskManager();
-        Gson gson = new Gson();
+        Gson gson = new GsonBuilder()
+                .registerTypeAdapter(LocalDateTime.class, new LocalDateTimeAdapter())
+                .create();
         HttpServer httpServer = HttpServer.create(new InetSocketAddress(PORT), 0);
         httpServer.createContext("/tasks", new TaskHandler(taskManager, gson));
         httpServer.createContext("/subtasks", new SubtaskHandler(taskManager, gson));
