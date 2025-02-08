@@ -9,8 +9,8 @@ import java.io.IOException;
 public class SubtaskHandler extends BaseHttpHandler {
 
 
-    public SubtaskHandler(TaskManager taskManager, Gson gson) {
-        super(taskManager, gson);
+    public SubtaskHandler(Gson gson, TaskManager taskManager) {
+        super(gson, taskManager);
     }
 
     @Override

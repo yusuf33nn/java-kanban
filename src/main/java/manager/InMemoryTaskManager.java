@@ -1,6 +1,7 @@
 package manager;
 
 import exception.ManagerSaveException;
+import exception.NotFoundException;
 import history.HistoryManager;
 import models.Epic;
 import models.Subtask;
@@ -159,29 +160,33 @@ public class InMemoryTaskManager implements TaskManager {
 
     @Override
     public Task getTask(long taskId) {
-        var task = taskMap.getOrDefault(taskId, null);
-        if (task != null) {
-            historyManager.add(task);
-        }
-        return task;
+        return Optional.ofNullable(taskMap.get(taskId))
+                .map(task -> {
+                    historyManager.add(task);
+                    return task;
+                })
+                .orElseThrow(NotFoundException::new);
+
     }
 
     @Override
     public Subtask getSubtask(long subtaskId) {
-        var subtask = subtaskMap.getOrDefault(subtaskId, null);
-        if (subtask != null) {
-            historyManager.add(subtask);
-        }
-        return subtask;
+        return Optional.ofNullable(subtaskMap.get(subtaskId))
+                .map(subtask -> {
+                    historyManager.add(subtask);
+                    return subtask;
+                })
+                .orElseThrow(NotFoundException::new);
     }
 
     @Override
     public Epic getEpic(long epicId) {
-        var epic = epicMap.getOrDefault(epicId, null);
-        if (epic != null) {
-            historyManager.add(epic);
-        }
-        return epic;
+        return Optional.ofNullable(epicMap.get(epicId))
+                .map(epic -> {
+                    historyManager.add(epic);
+                    return epic;
+                })
+                .orElseThrow(NotFoundException::new);
     }
 
     public Set<Task> getPrioritizedTasks() {

@@ -6,8 +6,8 @@ import manager.TaskManager;
 
 public class EpicHandler extends BaseHttpHandler {
 
-    public EpicHandler(TaskManager taskManager, Gson gson) {
-        super(taskManager, gson);
+    public EpicHandler(Gson gson, TaskManager taskManager) {
+        super(gson, taskManager);
     }
 
     @Override
