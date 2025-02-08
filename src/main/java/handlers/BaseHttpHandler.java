@@ -4,6 +4,7 @@ import com.google.gson.Gson;
 import com.sun.net.httpserver.HttpExchange;
 import com.sun.net.httpserver.HttpHandler;
 import exception.ManagerSaveException;
+import exception.NotFoundException;
 import manager.TaskManager;
 import models.Epic;
 import models.Subtask;
@@ -124,6 +125,8 @@ public class BaseHttpHandler implements HttpHandler {
             }
             var resp = gson.toJson(task);
             sendOk(exchange, resp);
+        } catch (NotFoundException e) {
+            sendNotFound(exchange);
         } catch (Exception e) {
             sendError(exchange, e);
         }
@@ -134,12 +137,14 @@ public class BaseHttpHandler implements HttpHandler {
             long taskId = retrieveIdFromPath(exchange);
             taskManager.removeById(taskId);
             sendOk(exchange, "");
+        } catch (NotFoundException e) {
+            sendNotFound(exchange);
         } catch (Exception e) {
             sendError(exchange, e);
         }
     }
 
-    protected void createOrUpdateTask(HttpExchange exchange, Class<? extends Task> tClass) {
+    protected void create(HttpExchange exchange, Class<? extends Task> tClass) {
         try {
             String requestBody = new String(exchange.getRequestBody().readAllBytes(), DEFAULT_CHARSET);
             Task task = gson.fromJson(requestBody, tClass);
@@ -147,6 +152,23 @@ public class BaseHttpHandler implements HttpHandler {
             sendCreated(exchange);
         } catch (ManagerSaveException e) {
             sendHasInteractions(exchange);
+        } catch (Exception e) {
+            sendError(exchange, e);
+        }
+    }
+
+    protected void update(HttpExchange exchange, Class<? extends Task> tClass) {
+        try {
+            long taskId = retrieveIdFromPath(exchange);
+            String requestBody = new String(exchange.getRequestBody().readAllBytes(), DEFAULT_CHARSET);
+            Task task = gson.fromJson(requestBody, tClass);
+            task.setId(taskId);
+            taskManager.updateTask(task);
+            sendCreated(exchange);
+        } catch (ManagerSaveException e) {
+            sendHasInteractions(exchange);
+        } catch (NotFoundException e) {
+            sendNotFound(exchange);
         } catch (Exception e) {
             sendError(exchange, e);
         }

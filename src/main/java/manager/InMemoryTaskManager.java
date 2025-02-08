@@ -145,7 +145,7 @@ public class InMemoryTaskManager implements TaskManager {
             updatedEpic.calculateEpic();
             epicMap.put(taskId, updatedEpic);
         } else {
-            throw new RuntimeException("Task with id = %d doesn't not exist".formatted(taskId));
+            throw new NotFoundException("Task with id = %d doesn't not exist".formatted(taskId));
         }
     }
 

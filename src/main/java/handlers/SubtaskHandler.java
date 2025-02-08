@@ -21,7 +21,8 @@ public class SubtaskHandler extends BaseHttpHandler {
         switch (subtaskEndpoint) {
             case GET_SUBTASK -> getById(exchange, Subtask.class);
             case GET_ALL_SUBTASKS -> getAll(exchange, Subtask.class);
-            case POST_SUBTASK, UPDATE_SUBTASK-> createOrUpdateTask(exchange, Subtask.class);
+            case POST_SUBTASK -> create(exchange, Subtask.class);
+            case UPDATE_SUBTASK -> update(exchange, Subtask.class);
             case DELETE_SUBTASK -> deleteById(exchange);
             case UNKNOWN -> sendError(exchange, new RuntimeException("No such method"));
         }

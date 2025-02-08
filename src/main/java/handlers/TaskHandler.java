@@ -21,7 +21,8 @@ public class TaskHandler extends BaseHttpHandler {
         switch (endpoint) {
             case GET_TASK -> getById(exchange, Task.class);
             case GET_ALL_TASKS -> getAll(exchange, Task.class);
-            case POST_TASK, UPDATE_TASK -> createOrUpdateTask(exchange, Task.class);
+            case POST_TASK -> create(exchange, Task.class);
+            case UPDATE_TASK -> update(exchange, Task.class);
             case DELETE_TASK -> deleteById(exchange);
             case UNKNOWN -> sendError(exchange, new RuntimeException("No such method"));
         }

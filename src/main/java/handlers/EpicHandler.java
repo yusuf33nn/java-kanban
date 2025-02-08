@@ -19,11 +19,11 @@ public class EpicHandler extends BaseHttpHandler {
         switch (epicEndpoint) {
             case GET_EPIC -> getById(exchange, Epic.class);
             case GET_ALL_EPICS -> getAll(exchange, Epic.class);
-            case POST_EPIC, UPDATE_EPIC -> createOrUpdateTask(exchange, Epic.class);
+            case POST_EPIC -> create(exchange, Epic.class);
+            case UPDATE_EPIC -> update(exchange, Epic.class);
             case DELETE_EPIC -> deleteById(exchange);
             case UNKNOWN -> sendError(exchange, new RuntimeException("No such method"));
         }
-
     }
 
     private EpicEndpoint getEndpoint(String requestPath, String requestMethod) {
