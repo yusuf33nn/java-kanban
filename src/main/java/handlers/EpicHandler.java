@@ -4,6 +4,9 @@ import com.google.gson.Gson;
 import com.sun.net.httpserver.HttpExchange;
 import manager.TaskManager;
 import models.Epic;
+import models.Subtask;
+
+import java.util.List;
 
 public class EpicHandler extends BaseHttpHandler {
     private static final String basePath = "epics";
@@ -19,10 +22,22 @@ public class EpicHandler extends BaseHttpHandler {
         switch (epicEndpoint) {
             case GET_EPIC -> getById(exchange, Epic.class);
             case GET_ALL_EPICS -> getAll(exchange, Epic.class);
+            case GET_EPIC_SUBTASKS -> getEpicSubtasks(exchange);
             case POST_EPIC -> create(exchange, Epic.class);
             case UPDATE_EPIC -> update(exchange, Epic.class);
             case DELETE_EPIC -> deleteById(exchange);
             case UNKNOWN -> sendError(exchange, new RuntimeException("No such method"));
+        }
+    }
+
+    private void getEpicSubtasks(HttpExchange exchange) {
+        long epicId = retrieveIdFromPath(exchange);
+        List<Subtask> subtasks = taskManager.getEpicSubtasks(epicId);
+        try {
+            var resp = gson.toJson(subtasks);
+            sendOk(exchange, resp);
+        } catch (Exception e) {
+            sendError(exchange, e);
         }
     }
 
@@ -47,5 +62,5 @@ public class EpicHandler extends BaseHttpHandler {
         return EpicEndpoint.UNKNOWN;
     }
 
-    enum EpicEndpoint {GET_EPIC, GET_ALL_EPICS, POST_EPIC, UPDATE_EPIC, DELETE_EPIC, UNKNOWN}
+    enum EpicEndpoint {GET_EPIC, GET_ALL_EPICS, GET_EPIC_SUBTASKS, POST_EPIC, UPDATE_EPIC, DELETE_EPIC, UNKNOWN}
 }

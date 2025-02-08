@@ -82,8 +82,7 @@ public class BaseHttpHandler implements HttpHandler {
     }
 
     protected long retrieveIdFromPath(HttpExchange exchange) {
-        String path = exchange.getRequestURI().getPath();
-        String id = path.substring(path.lastIndexOf("/") + 1);
+        String id = exchange.getRequestURI().getPath().split("/")[2];
         try {
             return Long.parseLong(id);
         } catch (NumberFormatException e) {
