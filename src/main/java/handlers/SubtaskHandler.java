@@ -48,5 +48,5 @@ public class SubtaskHandler extends BaseHttpHandler {
         return SubtaskEndpoint.UNKNOWN;
     }
 
-    enum SubtaskEndpoint {GET_SUBTASK, GET_ALL_SUBTASKS, POST_SUBTASK, UPDATE_SUBTASK, DELETE_SUBTASK, UNKNOWN}
+    enum SubtaskEndpoint { GET_SUBTASK, GET_ALL_SUBTASKS, POST_SUBTASK, UPDATE_SUBTASK, DELETE_SUBTASK, UNKNOWN }
 }
