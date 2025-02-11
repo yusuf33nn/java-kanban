@@ -45,7 +45,7 @@ public class FileBackedTaskManager extends InMemoryTaskManager {
             try {
                 file.createNewFile();
             } catch (IOException e) {
-                throw new ManagerSaveException("Error creating file: %s".formatted(e.getMessage()));
+                throw new ManagerSaveException("Error creating file: %s with path: '%s'".formatted(e.getMessage(), path.toString()));
             }
         }
         try (BufferedWriter bw = new BufferedWriter(new FileWriter(file, false))) {
