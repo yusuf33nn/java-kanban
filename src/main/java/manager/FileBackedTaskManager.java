@@ -56,6 +56,7 @@ public class FileBackedTaskManager extends InMemoryTaskManager {
             }
 
         } catch (IOException e) {
+            System.out.println(e);
             throw new ManagerSaveException("Error while saving file");
         }
     }
