@@ -15,13 +15,14 @@ import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.util.List;
 
+import static utils.HttpStatusCodeConstants.CREATED;
+import static utils.HttpStatusCodeConstants.INTERNAL_SERVER_ERROR;
+import static utils.HttpStatusCodeConstants.NOT_ACCEPTABLE;
+import static utils.HttpStatusCodeConstants.NOT_FOUND;
+import static utils.HttpStatusCodeConstants.OK;
+
 
 public class BaseHttpHandler implements HttpHandler {
-    private static final int OK = 200;
-    private static final int CREATED = 201;
-    private static final int NOT_FOUND = 404;
-    private static final int NOT_ACCEPTABLE = 406;
-    private static final int INTERNAL_SERVER_ERROR = 500;
 
     public static final String GET_METHOD = "GET";
     public static final String POST_METHOD = "POST";

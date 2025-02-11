@@ -206,13 +206,14 @@ public class InMemoryTaskManager implements TaskManager {
         TASK_ID_COUNTER = 0;
     }
 
+    @Override
     public void removeTask(long taskId) {
         Optional.ofNullable(taskMap.get(taskId))
                 .ifPresent(prioritizedTasks::remove);
         taskMap.remove(taskId);
         historyManager.remove(taskId);
     }
-
+    @Override
     public void removeSubtask(long subtaskId) {
         var subtask = subtaskMap.get(subtaskId);
         prioritizedTasks.remove(subtask);
@@ -223,7 +224,7 @@ public class InMemoryTaskManager implements TaskManager {
         epic.getSubtasks().remove(subtask);
         epic.calculateEpic();
     }
-
+    @Override
     public void removeEpic(long epicId) {
         List<Long> subtasksToBeDeleted = epicMap.get(epicId).getSubtasks().stream().map(Task::getId).toList();
         epicMap.remove(epicId);
@@ -236,19 +237,19 @@ public class InMemoryTaskManager implements TaskManager {
             historyManager.remove(subtaskId);
         });
     }
-
+    @Override
     public void removeTasks() {
         taskMap.keySet().forEach(this::removeTask);
     }
-
+    @Override
     public void removeSubtasks() {
         subtaskMap.keySet().forEach(this::removeSubtask);
     }
-
+    @Override
     public void removeEpics() {
         epicMap.keySet().forEach(this::removeEpic);
     }
-
+    @Override
     public void removeAllTasks() {
         taskMap.clear();
         subtaskMap.clear();

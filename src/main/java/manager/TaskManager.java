@@ -38,4 +38,18 @@ public interface TaskManager {
     void validateTimeCrossing(Task newtask);
 
     Set<Task> getPrioritizedTasks();
+
+    void removeTask(long taskId);
+
+    void removeSubtask(long subtaskId);
+
+    void removeEpic(long epicId);
+
+    void removeTasks();
+
+    void removeSubtasks();
+
+    void removeEpics();
+
+    void removeAllTasks();
 }
