@@ -40,7 +40,15 @@ public class FileBackedTaskManager extends InMemoryTaskManager {
     }
 
     private void save() {
-        try (BufferedWriter bw = new BufferedWriter(new FileWriter(path.toFile(), false))) {
+        File file = path.toFile();
+        if (!path.toFile().exists()) {
+            try {
+                file.createNewFile();
+            } catch (IOException e) {
+                throw new ManagerSaveException("Error creating file: %s".formatted(e.getMessage()));
+            }
+        }
+        try (BufferedWriter bw = new BufferedWriter(new FileWriter(file, false))) {
             bw.write("id,type,name,status,description,startTime,duration,epic\n");
 
             for (Task task : getAllTasks()) {
