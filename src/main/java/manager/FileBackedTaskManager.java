@@ -27,8 +27,11 @@ public class FileBackedTaskManager extends InMemoryTaskManager {
 
     @Override
     public Task createNewTask(Task task) {
+        var taskId = task.getId();
         var newTask = super.createNewTask(task);
-        save();
+        if (taskId == 0) {
+            save();
+        }
         return newTask;
     }
 
@@ -41,15 +44,15 @@ public class FileBackedTaskManager extends InMemoryTaskManager {
             bw.write("id,type,name,status,description,startTime,duration,epic\n");
 
             for (Task task : getAllTasks()) {
-                bw.write(task.toString() + ",\n");
+                bw.write(task.toString(true) + ",\n");
             }
 
             for (Epic epic : getAllEpics()) {
-                bw.write(epic.toString() + ",\n");
+                bw.write(epic.toString(true) + ",\n");
             }
 
             for (Subtask subtask : getAllSubtasks()) {
-                bw.write(subtask.toString() + "," + subtask.getEpic().getId() + "\n");
+                bw.write(subtask.toString(true) + "," + subtask.getEpic().getId() + "\n");
             }
 
         } catch (IOException e) {

@@ -12,6 +12,7 @@ import java.time.Duration;
 import java.time.LocalDateTime;
 import java.util.List;
 
+import static manager.InMemoryTaskManager.getTaskIdCounter;
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
@@ -94,8 +95,7 @@ public abstract class TaskManagerTest<T extends TaskManager> {
         Task taskWithGeneratedId = taskManager.createNewTask(task);
 
         assertNotNull(taskWithGeneratedId);
-
-        assertNotEquals(concreteId, taskWithGeneratedId.getId());
+        assertNotEquals(concreteId, getTaskIdCounter());
     }
 
     @Test

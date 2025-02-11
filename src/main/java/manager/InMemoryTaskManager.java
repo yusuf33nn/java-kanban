@@ -47,7 +47,7 @@ public class InMemoryTaskManager implements TaskManager {
 
     @Override
     public Task createNewTask(Task task) {
-        long taskId = ++TASK_ID_COUNTER;
+        long taskId = task.getId() == 0 ? ++TASK_ID_COUNTER : task.getId();
         task.setId(taskId);
 
         if (task instanceof Subtask subtask) {
@@ -169,7 +169,7 @@ public class InMemoryTaskManager implements TaskManager {
                     historyManager.add(task);
                     return task;
                 })
-                .orElseThrow(() -> new NotFoundException("Task with taskId = %d doesn't not exist".formatted(taskId)));
+                .orElse(null);
 
     }
 
@@ -179,9 +179,7 @@ public class InMemoryTaskManager implements TaskManager {
                 .map(subtask -> {
                     historyManager.add(subtask);
                     return subtask;
-                })
-                .orElseThrow(() -> new NotFoundException("Subtask with subtaskId = %d doesn't not exist"
-                        .formatted(subtaskId)));
+                }).orElse(null);
     }
 
     @Override
@@ -190,8 +188,7 @@ public class InMemoryTaskManager implements TaskManager {
                 .map(epic -> {
                     historyManager.add(epic);
                     return epic;
-                })
-                .orElseThrow(() -> new NotFoundException("Epic with epicId = %d doesn't not exist".formatted(epicId)));
+                }).orElse(null);
     }
 
     @Override
@@ -258,5 +255,9 @@ public class InMemoryTaskManager implements TaskManager {
         epicMap.clear();
         historyManager.removeAllHistory();
         prioritizedTasks.clear();
+    }
+
+    public static long getTaskIdCounter() {
+        return TASK_ID_COUNTER;
     }
 }
