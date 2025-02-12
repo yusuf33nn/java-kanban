@@ -1,4 +1,9 @@
+import adapters.DurationAdapter;
+import adapters.LocalDateTimeAdapter;
+import com.google.gson.ExclusionStrategy;
+import com.google.gson.FieldAttributes;
 import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
 import manager.InMemoryTaskManager;
 import manager.TaskManager;
 import models.Epic;
@@ -30,10 +35,27 @@ public class HttpTaskServerEpicsTest {
     private static final String BASE_URI = "http://localhost:8080/epics";
 
     TaskManager manager = new InMemoryTaskManager();
-    HttpTaskServer taskServer = new HttpTaskServer(manager);
-    Gson gson = HttpTaskServer.getGson();
+    Gson gson =
+            new GsonBuilder()
+                    .registerTypeAdapter(LocalDateTime.class, new LocalDateTimeAdapter())
+                    .registerTypeAdapter(Duration.class, new DurationAdapter())
+                    .setExclusionStrategies(new ExclusionStrategy() {
+                        @Override
+                        public boolean shouldSkipField(FieldAttributes f) {
+                            return f.getName().equals("epic");
+                        }
 
-    public HttpTaskServerEpicsTest() throws IOException {}
+                        @Override
+                        public boolean shouldSkipClass(Class<?> clazz) {
+                            return false;
+                        }
+                    })
+                    .create();
+    HttpTaskServer taskServer = new HttpTaskServer(manager, gson);
+
+
+    public HttpTaskServerEpicsTest() throws IOException {
+    }
 
     @BeforeEach
     public void setUp() {
@@ -65,7 +87,6 @@ public class HttpTaskServerEpicsTest {
         assertEquals(1, epicsFromManager.size(), "Некорректное количество эпиков");
         assertEquals("epic", epicsFromManager.getFirst().getName(), "Некорректное имя эпика");
     }
-
 
 
     @Test
@@ -145,7 +166,22 @@ public class HttpTaskServerEpicsTest {
     @Test
     public void should_findSubtasksByEpicId_and_return_200_code() throws IOException, InterruptedException {
         Epic epic = new Epic("epic", "epic_desc", LocalDateTime.now(), Duration.ZERO);
-        String epicJson = gson.toJson(epic);
+        Gson localGson = new GsonBuilder()
+                .registerTypeAdapter(LocalDateTime.class, new LocalDateTimeAdapter())
+                .registerTypeAdapter(Duration.class, new DurationAdapter())
+                .setExclusionStrategies(new ExclusionStrategy() {
+                    @Override
+                    public boolean shouldSkipField(FieldAttributes f) {
+                        return f.getName().equals("epic");
+                    }
+
+                    @Override
+                    public boolean shouldSkipClass(Class<?> clazz) {
+                        return false;
+                    }
+                })
+                .create();
+        String epicJson = localGson.toJson(epic);
 
         HttpClient client = HttpClient.newHttpClient();
         URI url = URI.create(BASE_URI);
@@ -164,11 +200,11 @@ public class HttpTaskServerEpicsTest {
 
 
         URI url2 = URI.create(BASE_URI + "/" + epicFromManager.getId() + "/subtasks");
-        HttpRequest request3 = HttpRequest.newBuilder().uri(url2).GET().version(HttpClient.Version.HTTP_1_1).build();
+        HttpRequest request3 = HttpRequest.newBuilder().uri(url2).GET().build();
         HttpResponse<String> response = client.send(request3, HttpResponse.BodyHandlers.ofString());
         assertEquals(OK, response.statusCode());
 
-        List<Subtask> subtasksFromResponse = gson.fromJson(response.body(), new SubtaskListTypeToken().getType());
+        List<Subtask> subtasksFromResponse = localGson.fromJson(response.body(), new SubtaskListTypeToken().getType());
         List<Subtask> subtasksFromManager = manager.getEpicSubtasks(epicFromManager.getId());
 
         assertNotNull(subtasksFromManager, "Сабтаски не найдены");

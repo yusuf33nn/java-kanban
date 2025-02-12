@@ -1,4 +1,7 @@
+import adapters.DurationAdapter;
+import adapters.LocalDateTimeAdapter;
 import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
 import manager.InMemoryTaskManager;
 import manager.TaskManager;
 import models.Task;
@@ -29,9 +32,12 @@ public class HttpTaskServerTasksTest {
 
     private static final String BASE_URI = "http://localhost:8080/tasks";
     TaskManager manager = new InMemoryTaskManager();
-    // передаём его в качестве аргумента в конструктор HttpTaskServer
-    HttpTaskServer taskServer = new HttpTaskServer(manager);
-    Gson gson = HttpTaskServer.getGson();
+
+    Gson gson = new GsonBuilder()
+                    .registerTypeAdapter(LocalDateTime.class, new LocalDateTimeAdapter())
+                    .registerTypeAdapter(Duration.class, new DurationAdapter())
+                    .create();
+    HttpTaskServer taskServer = new HttpTaskServer(manager, gson);
 
     public HttpTaskServerTasksTest() throws IOException {}
 

@@ -1,10 +1,11 @@
+import adapters.DurationAdapter;
+import adapters.LocalDateTimeAdapter;
 import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
 import manager.InMemoryTaskManager;
 import manager.TaskManager;
 import models.Epic;
 import models.Subtask;
-import models.Task;
-import models.TaskType;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -32,8 +33,12 @@ public class HttpTaskServerSubtasksTest {
     private static final String BASE_URI = "http://localhost:8080/subtasks";
     private final Epic epic = new Epic("epic", "epic_desc", LocalDateTime.now(), Duration.ZERO);
     TaskManager manager = new InMemoryTaskManager();
-    HttpTaskServer taskServer = new HttpTaskServer(manager);
-    Gson gson = HttpTaskServer.getGson();
+    Gson gson =
+            new GsonBuilder()
+                    .registerTypeAdapter(LocalDateTime.class, new LocalDateTimeAdapter())
+                    .registerTypeAdapter(Duration.class, new DurationAdapter())
+                    .create();
+    HttpTaskServer taskServer = new HttpTaskServer(manager, gson);
 
     public HttpTaskServerSubtasksTest() throws IOException {}
 
@@ -176,43 +181,37 @@ public class HttpTaskServerSubtasksTest {
     public void should_deleteSubtaskById_and_return_200_code() throws IOException, InterruptedException {
         Subtask subtask1 = new Subtask("subtask1", "subtask1_desc1", LocalDateTime.now(), Duration.ofMinutes(200));
         subtask1.setEpic(epic);
-        String subtaskJson1 = gson.toJson(subtask1);
+        manager.createNewTask(subtask1);
+        long subtaskId = 2L;
+        Subtask subtaskFromManager = manager.getSubtask(subtaskId);
+        assertNotNull(subtaskFromManager);
 
         HttpClient client = HttpClient.newHttpClient();
-        URI url = URI.create(BASE_URI);
-        HttpRequest request = HttpRequest.newBuilder().uri(url).POST(HttpRequest.BodyPublishers.ofString(subtaskJson1)).build();
 
-        client.send(request, HttpResponse.BodyHandlers.ofString());
-
-        URI url2 = URI.create(BASE_URI + "/" + getTaskIdCounter());
+        URI url2 = URI.create(BASE_URI + "/" + subtaskId);
         HttpRequest request2 = HttpRequest.newBuilder().uri(url2).DELETE().build();
         HttpResponse<String> response = client.send(request2, HttpResponse.BodyHandlers.ofString());
         assertEquals(OK, response.statusCode());
 
-        Subtask subtaskFromManager = manager.getSubtask(getTaskIdCounter());
+        Subtask subtaskFromManagerAfterDeletion = manager.getSubtask(subtaskId);
 
-        assertNull(subtaskFromManager, "Подзадача не найдена");
+        assertNull(subtaskFromManagerAfterDeletion, "Подзадача не найдена");
     }
 
     @Test
-    public void should_not_deleteTaskById_and_return_404_code() throws IOException, InterruptedException {
-        Task task1 = new Task("Test 1", "Testing task 1", TaskType.TASK,
-                LocalDateTime.now(), Duration.ofMinutes(5));
-        String taskJson1 = gson.toJson(task1);
+    public void should_not_deleteSubtaskById_and_return_404_code() throws IOException, InterruptedException {
+        Subtask subtask1 = new Subtask("subtask1", "subtask1_desc1", LocalDateTime.now(), Duration.ofMinutes(200));
+        subtask1.setEpic(epic);
+        manager.createNewTask(subtask1);
+        long subtaskId = 3L;
+        Subtask subtaskFromManager = manager.getSubtask(subtaskId);
+        assertNull(subtaskFromManager);
 
         HttpClient client = HttpClient.newHttpClient();
-        URI url = URI.create(BASE_URI);
 
-        HttpRequest request1 = HttpRequest.newBuilder().uri(url).POST(HttpRequest.BodyPublishers.ofString(taskJson1)).build();
-        client.send(request1, HttpResponse.BodyHandlers.ofString());
-
-        URI url2 = URI.create(BASE_URI + "/2");
+        URI url2 = URI.create(BASE_URI + "/" + subtaskId);
         HttpRequest request2 = HttpRequest.newBuilder().uri(url2).DELETE().build();
         HttpResponse<String> response = client.send(request2, HttpResponse.BodyHandlers.ofString());
         assertEquals(NOT_FOUND, response.statusCode());
-
-        Task taskFromManager = manager.getTask(2L);
-
-        assertNull(taskFromManager, "Задача найдена");
     }
 }

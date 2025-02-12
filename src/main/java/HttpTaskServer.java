@@ -1,7 +1,5 @@
 import adapters.DurationAdapter;
 import adapters.LocalDateTimeAdapter;
-import com.google.gson.ExclusionStrategy;
-import com.google.gson.FieldAttributes;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.sun.net.httpserver.HttpServer;
@@ -20,27 +18,10 @@ import java.time.LocalDateTime;
 
 public class HttpTaskServer {
 
-    private static final Gson gson =
-            new GsonBuilder()
-                    .registerTypeAdapter(LocalDateTime.class, new LocalDateTimeAdapter())
-                    .registerTypeAdapter(Duration.class, new DurationAdapter())
-                    .setExclusionStrategies(new ExclusionStrategy() {
-                        @Override
-                        public boolean shouldSkipField(FieldAttributes f) {
-                            return f.getName().equals("epic");
-                        }
-
-                        @Override
-                        public boolean shouldSkipClass(Class<?> clazz) {
-                            return false;
-                        }
-                    })
-                    .create();
-
     private static final int PORT = 8080;
     private final HttpServer httpServer;
 
-    public HttpTaskServer(TaskManager taskManager) throws IOException {
+    public HttpTaskServer(TaskManager taskManager, Gson gson) throws IOException {
 
         this.httpServer = HttpServer.create(new InetSocketAddress(PORT), 0);
         httpServer.createContext("/tasks", new TaskHandler(gson, taskManager));
@@ -60,14 +41,15 @@ public class HttpTaskServer {
         System.out.println("HTTP-сервер остановлен на " + PORT + " порту!");
     }
 
-    public static Gson getGson() {
-        return gson;
-    }
-
     public static void main(String[] args) throws IOException {
 
         TaskManager taskManager = Managers.getInMemoryTaskManager();
-        HttpTaskServer httpTaskServer = new HttpTaskServer(taskManager);
+        Gson gson =
+            new GsonBuilder()
+                    .registerTypeAdapter(LocalDateTime.class, new LocalDateTimeAdapter())
+                    .registerTypeAdapter(Duration.class, new DurationAdapter())
+                    .create();
+        HttpTaskServer httpTaskServer = new HttpTaskServer(taskManager, gson);
         httpTaskServer.startServer();
     }
 }
