@@ -18,10 +18,13 @@ import java.time.LocalDateTime;
 
 public class HttpTaskServer {
 
-    private static final Gson gson = new GsonBuilder()
-            .registerTypeAdapter(LocalDateTime.class, new LocalDateTimeAdapter())
-            .registerTypeAdapter(Duration.class, new DurationAdapter())
-            .create();
+    private static final Gson gson =
+            new GsonBuilder()
+                    .registerTypeAdapter(LocalDateTime.class, new LocalDateTimeAdapter())
+                    .registerTypeAdapter(Duration.class, new DurationAdapter())
+                    .create();
+
+    private static final int PORT = 8080;
     private final HttpServer httpServer;
 
     public HttpTaskServer(TaskManager taskManager) throws IOException {
@@ -47,8 +50,6 @@ public class HttpTaskServer {
     public static Gson getGson() {
         return gson;
     }
-
-    private static final int PORT = 8080;
 
     public static void main(String[] args) throws IOException {
 

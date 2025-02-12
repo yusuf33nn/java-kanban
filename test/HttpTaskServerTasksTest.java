@@ -20,13 +20,13 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static utils.HttpStatusCodeConstants.CREATED;
 
-public class HttpTaskServerTest {
+public class HttpTaskServerTasksTest {
     TaskManager manager = new InMemoryTaskManager();
     // передаём его в качестве аргумента в конструктор HttpTaskServer
     HttpTaskServer taskServer = new HttpTaskServer(manager);
     Gson gson = HttpTaskServer.getGson();
 
-    public HttpTaskServerTest() throws IOException {}
+    public HttpTaskServerTasksTest() throws IOException {}
 
     @BeforeEach
     public void setUp() {
