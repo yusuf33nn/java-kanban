@@ -14,6 +14,7 @@ import java.io.IOException;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.util.List;
+import java.util.Optional;
 
 import static utils.HttpStatusCodeConstants.CREATED;
 import static utils.HttpStatusCodeConstants.INTERNAL_SERVER_ERROR;
@@ -123,10 +124,12 @@ public class BaseHttpHandler implements HttpHandler {
             } else {
                 throw new IllegalArgumentException("Неизвестный тип задачи: " + tClass);
             }
-            var resp = gson.toJson(task);
-            sendOk(exchange, resp);
-        } catch (NotFoundException e) {
-            sendNotFound(exchange);
+            Optional.ofNullable(task)
+                    .ifPresentOrElse(el -> {
+                                var resp = gson.toJson(task);
+                                sendOk(exchange, resp);
+                            },
+                            () -> sendNotFound(exchange));
         } catch (Exception e) {
             sendError(exchange, e);
         }
