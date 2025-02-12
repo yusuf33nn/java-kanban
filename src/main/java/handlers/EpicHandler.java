@@ -44,23 +44,35 @@ public class EpicHandler extends BaseHttpHandler {
     private EpicEndpoint getEndpoint(String requestPath, String requestMethod) {
         String[] pathParts = requestPath.split("/");
 
-        if (pathParts.length == 2 && pathParts[1].equals(basePath)) {
-            if (requestMethod.equals(GET_METHOD)) {
-                return EpicEndpoint.GET_ALL_EPICS;
-            } else {
-                return EpicEndpoint.POST_EPIC;
+        if (pathParts[1].equals(basePath)) {
+            EpicEndpoint result = null;
+            switch (pathParts.length) {
+                case 2 -> {
+                    if (requestMethod.equals(GET_METHOD)) {
+                        result = EpicEndpoint.GET_ALL_EPICS;
+                    } else {
+                        result = EpicEndpoint.POST_EPIC;
+                    }
+                }
+                case 3 -> result = switch (requestMethod) {
+                    case GET_METHOD -> EpicEndpoint.GET_EPIC;
+                    case POST_METHOD -> EpicEndpoint.UPDATE_EPIC;
+                    case DELETE_METHOD -> EpicEndpoint.DELETE_EPIC;
+                    default -> throw new IllegalStateException("Unexpected value: " + requestMethod);
+                };
+                case 4 -> {
+                    if ("subtasks".equals(pathParts[3])) {
+                        result = EpicEndpoint.GET_EPIC_SUBTASKS;
+                    } else {
+                        result = EpicEndpoint.UNKNOWN;
+                    }
+                }
             }
+            return result;
+        } else {
+            return EpicEndpoint.UNKNOWN;
         }
-        if (pathParts.length == 3 && pathParts[1].equals(basePath)) {
-            return switch (requestMethod) {
-                case GET_METHOD -> EpicEndpoint.GET_EPIC;
-                case POST_METHOD -> EpicEndpoint.UPDATE_EPIC;
-                case DELETE_METHOD -> EpicEndpoint.DELETE_EPIC;
-                default -> throw new IllegalStateException("Unexpected value: " + requestMethod);
-            };
-        }
-        return EpicEndpoint.UNKNOWN;
     }
 
-    enum EpicEndpoint { GET_EPIC, GET_ALL_EPICS, GET_EPIC_SUBTASKS, POST_EPIC, UPDATE_EPIC, DELETE_EPIC, UNKNOWN }
+    enum EpicEndpoint {GET_EPIC, GET_ALL_EPICS, GET_EPIC_SUBTASKS, POST_EPIC, UPDATE_EPIC, DELETE_EPIC, UNKNOWN}
 }

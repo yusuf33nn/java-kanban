@@ -175,4 +175,48 @@ public class HttpTaskServerTasksTest {
 
         assertNull(taskFromManager, "Задача найдена");
     }
+
+    @Test
+    public void should_deleteTaskById_and_return_200_code() throws IOException, InterruptedException {
+        Task task1 = new Task("Test 1", "Testing task 1", TaskType.TASK,
+                LocalDateTime.now(), Duration.ofMinutes(5));
+        String taskJson1 = gson.toJson(task1);
+
+        HttpClient client = HttpClient.newHttpClient();
+        URI url = URI.create(BASE_URI);
+
+        HttpRequest request1 = HttpRequest.newBuilder().uri(url).POST(HttpRequest.BodyPublishers.ofString(taskJson1)).build();
+        client.send(request1, HttpResponse.BodyHandlers.ofString());
+
+        URI url2 = URI.create(BASE_URI + "/1");
+        HttpRequest request2 = HttpRequest.newBuilder().uri(url2).DELETE().build();
+        HttpResponse<String> response = client.send(request2, HttpResponse.BodyHandlers.ofString());
+        assertEquals(OK, response.statusCode());
+
+        Task taskFromManager = manager.getTask(1L);
+
+        assertNull(taskFromManager, "Задача найдена");
+    }
+
+    @Test
+    public void should_not_deleteTaskById_and_return_404_code() throws IOException, InterruptedException {
+        Task task1 = new Task("Test 1", "Testing task 1", TaskType.TASK,
+                LocalDateTime.now(), Duration.ofMinutes(5));
+        String taskJson1 = gson.toJson(task1);
+
+        HttpClient client = HttpClient.newHttpClient();
+        URI url = URI.create(BASE_URI);
+
+        HttpRequest request1 = HttpRequest.newBuilder().uri(url).POST(HttpRequest.BodyPublishers.ofString(taskJson1)).build();
+        client.send(request1, HttpResponse.BodyHandlers.ofString());
+
+        URI url2 = URI.create(BASE_URI + "/2");
+        HttpRequest request2 = HttpRequest.newBuilder().uri(url2).DELETE().build();
+        HttpResponse<String> response = client.send(request2, HttpResponse.BodyHandlers.ofString());
+        assertEquals(NOT_FOUND, response.statusCode());
+
+        Task taskFromManager = manager.getTask(2L);
+
+        assertNull(taskFromManager, "Задача найдена");
+    }
 }

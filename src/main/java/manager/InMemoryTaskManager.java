@@ -115,7 +115,7 @@ public class InMemoryTaskManager implements TaskManager {
 
     @Override
     public List<Subtask> getEpicSubtasks(long epicId) {
-        return Optional.ofNullable(epicMap.getOrDefault(epicId, null))
+        return Optional.ofNullable(epicMap.get(epicId))
                 .map(Epic::getSubtasks)
                 .orElseThrow(() -> new RuntimeException("Epic with epicId = %d doesn't not exist".formatted(epicId)));
     }
@@ -158,7 +158,7 @@ public class InMemoryTaskManager implements TaskManager {
         } else if (epicMap.containsKey(taskId)) {
             removeEpic(taskId);
         } else {
-            throw new RuntimeException("Task with id = %d doesn't not exist".formatted(taskId));
+            throw new NotFoundException("Task with id = %d doesn't not exist".formatted(taskId));
         }
     }
 

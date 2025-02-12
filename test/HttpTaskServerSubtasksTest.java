@@ -3,6 +3,8 @@ import manager.InMemoryTaskManager;
 import manager.TaskManager;
 import models.Epic;
 import models.Subtask;
+import models.Task;
+import models.TaskType;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -168,5 +170,49 @@ public class HttpTaskServerSubtasksTest {
         Subtask taskFromManager = manager.getSubtask((getTaskIdCounter() + 1));
 
         assertNull(taskFromManager, "Подзадача найдена");
+    }
+
+    @Test
+    public void should_deleteSubtaskById_and_return_200_code() throws IOException, InterruptedException {
+        Subtask subtask1 = new Subtask("subtask1", "subtask1_desc1", LocalDateTime.now(), Duration.ofMinutes(200));
+        subtask1.setEpic(epic);
+        String subtaskJson1 = gson.toJson(subtask1);
+
+        HttpClient client = HttpClient.newHttpClient();
+        URI url = URI.create(BASE_URI);
+        HttpRequest request = HttpRequest.newBuilder().uri(url).POST(HttpRequest.BodyPublishers.ofString(subtaskJson1)).build();
+
+        client.send(request, HttpResponse.BodyHandlers.ofString());
+
+        URI url2 = URI.create(BASE_URI + "/" + getTaskIdCounter());
+        HttpRequest request2 = HttpRequest.newBuilder().uri(url2).DELETE().build();
+        HttpResponse<String> response = client.send(request2, HttpResponse.BodyHandlers.ofString());
+        assertEquals(OK, response.statusCode());
+
+        Subtask subtaskFromManager = manager.getSubtask(getTaskIdCounter());
+
+        assertNull(subtaskFromManager, "Подзадача не найдена");
+    }
+
+    @Test
+    public void should_not_deleteTaskById_and_return_404_code() throws IOException, InterruptedException {
+        Task task1 = new Task("Test 1", "Testing task 1", TaskType.TASK,
+                LocalDateTime.now(), Duration.ofMinutes(5));
+        String taskJson1 = gson.toJson(task1);
+
+        HttpClient client = HttpClient.newHttpClient();
+        URI url = URI.create(BASE_URI);
+
+        HttpRequest request1 = HttpRequest.newBuilder().uri(url).POST(HttpRequest.BodyPublishers.ofString(taskJson1)).build();
+        client.send(request1, HttpResponse.BodyHandlers.ofString());
+
+        URI url2 = URI.create(BASE_URI + "/2");
+        HttpRequest request2 = HttpRequest.newBuilder().uri(url2).DELETE().build();
+        HttpResponse<String> response = client.send(request2, HttpResponse.BodyHandlers.ofString());
+        assertEquals(NOT_FOUND, response.statusCode());
+
+        Task taskFromManager = manager.getTask(2L);
+
+        assertNull(taskFromManager, "Задача найдена");
     }
 }
