@@ -16,8 +16,6 @@ public class Task {
     private LocalDateTime startTime;
     private Duration duration;
 
-
-
     public Task(String name,
                 String description,
                 TaskType taskType,
@@ -119,11 +117,24 @@ public class Task {
         return copy;
     }
 
-    @Override
-    public String toString() {
+    public String toString(boolean forSaving) {
         var durationForRecord = Optional.ofNullable(duration).map(Duration::toMinutes).orElse(0L);
         return "%d,%s,%s,%s,%s,%s,%d"
                 .formatted(id, taskType.toString(), name, status.toString(), description, startTime, durationForRecord);
+    }
+
+    @Override
+    public String toString() {
+        var durationForRecord = Optional.ofNullable(duration).map(Duration::toMinutes).orElse(0L);
+        return "Task{" +
+                "id=" + id +
+                ", taskType=" + taskType +
+                ", name='" + name + '\'' +
+                ", status=" + status +
+                ", description='" + description + '\'' +
+                ", startTime=" + startTime +
+                ", duration=" + durationForRecord +
+                '}';
     }
 
     public LocalDateTime getEndTime() {

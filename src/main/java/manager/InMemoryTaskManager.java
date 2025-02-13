@@ -1,12 +1,14 @@
 package manager;
 
 import exception.ManagerSaveException;
+import exception.NotFoundException;
 import history.HistoryManager;
 import models.Epic;
 import models.Subtask;
 import models.Task;
 import utils.Managers;
 
+import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
@@ -45,19 +47,24 @@ public class InMemoryTaskManager implements TaskManager {
 
     @Override
     public Task createNewTask(Task task) {
-        long taskId = ++TASK_ID_COUNTER;
+        long taskId = task.getId() == 0 ? ++TASK_ID_COUNTER : task.getId();
         task.setId(taskId);
 
         if (task instanceof Subtask subtask) {
             subtaskMap.put(taskId, subtask);
             var epic = subtask.getEpic();
-            epic.getSubtasks().add(subtask);
-            epic.calculateEpic();
+
+            Epic existingEpic = epicMap.get(epic.getId());
+            existingEpic.addSubtask(subtask);
+            existingEpic.calculateEpic();
 
             validateTimeCrossing(subtask);
             addPriorityTask(subtask);
             return subtask;
         } else if (task instanceof Epic epic) {
+            if (epic.getSubtasks() == null) {
+                epic.setSubtasks(new ArrayList<>());
+            }
             epicMap.put(taskId, epic);
             return epic;
         } else {
@@ -101,16 +108,14 @@ public class InMemoryTaskManager implements TaskManager {
         }
 
         if (task == null) {
-            task = Optional.ofNullable(getEpic(taskId))
-                    .orElseThrow(() ->
-                            new RuntimeException("Task with taskId = %d doesn't not exist".formatted(taskId)));
+            task = getEpic(taskId);
         }
         return task;
     }
 
     @Override
     public List<Subtask> getEpicSubtasks(long epicId) {
-        return Optional.ofNullable(epicMap.getOrDefault(epicId, null))
+        return Optional.ofNullable(epicMap.get(epicId))
                 .map(Epic::getSubtasks)
                 .orElseThrow(() -> new RuntimeException("Epic with epicId = %d doesn't not exist".formatted(epicId)));
     }
@@ -140,7 +145,7 @@ public class InMemoryTaskManager implements TaskManager {
             updatedEpic.calculateEpic();
             epicMap.put(taskId, updatedEpic);
         } else {
-            throw new RuntimeException("Task with id = %d doesn't not exist".formatted(taskId));
+            throw new NotFoundException("Task with id = %d doesn't not exist".formatted(taskId));
         }
     }
 
@@ -153,37 +158,40 @@ public class InMemoryTaskManager implements TaskManager {
         } else if (epicMap.containsKey(taskId)) {
             removeEpic(taskId);
         } else {
-            throw new RuntimeException("Task with id = %d doesn't not exist".formatted(taskId));
+            throw new NotFoundException("Task with id = %d doesn't not exist".formatted(taskId));
         }
     }
 
     @Override
     public Task getTask(long taskId) {
-        var task = taskMap.getOrDefault(taskId, null);
-        if (task != null) {
-            historyManager.add(task);
-        }
-        return task;
+        return Optional.ofNullable(taskMap.get(taskId))
+                .map(task -> {
+                    historyManager.add(task);
+                    return task;
+                })
+                .orElse(null);
+
     }
 
     @Override
     public Subtask getSubtask(long subtaskId) {
-        var subtask = subtaskMap.getOrDefault(subtaskId, null);
-        if (subtask != null) {
-            historyManager.add(subtask);
-        }
-        return subtask;
+        return Optional.ofNullable(subtaskMap.get(subtaskId))
+                .map(subtask -> {
+                    historyManager.add(subtask);
+                    return subtask;
+                }).orElse(null);
     }
 
     @Override
     public Epic getEpic(long epicId) {
-        var epic = epicMap.getOrDefault(epicId, null);
-        if (epic != null) {
-            historyManager.add(epic);
-        }
-        return epic;
+        return Optional.ofNullable(epicMap.get(epicId))
+                .map(epic -> {
+                    historyManager.add(epic);
+                    return epic;
+                }).orElse(null);
     }
 
+    @Override
     public Set<Task> getPrioritizedTasks() {
         return prioritizedTasks;
     }
@@ -198,6 +206,7 @@ public class InMemoryTaskManager implements TaskManager {
         TASK_ID_COUNTER = 0;
     }
 
+    @Override
     public void removeTask(long taskId) {
         Optional.ofNullable(taskMap.get(taskId))
                 .ifPresent(prioritizedTasks::remove);
@@ -205,6 +214,7 @@ public class InMemoryTaskManager implements TaskManager {
         historyManager.remove(taskId);
     }
 
+    @Override
     public void removeSubtask(long subtaskId) {
         var subtask = subtaskMap.get(subtaskId);
         prioritizedTasks.remove(subtask);
@@ -216,6 +226,7 @@ public class InMemoryTaskManager implements TaskManager {
         epic.calculateEpic();
     }
 
+    @Override
     public void removeEpic(long epicId) {
         List<Long> subtasksToBeDeleted = epicMap.get(epicId).getSubtasks().stream().map(Task::getId).toList();
         epicMap.remove(epicId);
@@ -229,23 +240,31 @@ public class InMemoryTaskManager implements TaskManager {
         });
     }
 
+    @Override
     public void removeTasks() {
         taskMap.keySet().forEach(this::removeTask);
     }
 
+    @Override
     public void removeSubtasks() {
         subtaskMap.keySet().forEach(this::removeSubtask);
     }
 
+    @Override
     public void removeEpics() {
         epicMap.keySet().forEach(this::removeEpic);
     }
 
+    @Override
     public void removeAllTasks() {
         taskMap.clear();
         subtaskMap.clear();
         epicMap.clear();
         historyManager.removeAllHistory();
         prioritizedTasks.clear();
+    }
+
+    public static long getTaskIdCounter() {
+        return TASK_ID_COUNTER;
     }
 }

@@ -6,6 +6,7 @@ import models.Subtask;
 import models.Task;
 
 import java.util.List;
+import java.util.Set;
 
 public interface TaskManager {
     List<Task> getAllTasks();
@@ -35,4 +36,20 @@ public interface TaskManager {
     void resetCounter();
 
     void validateTimeCrossing(Task newtask);
+
+    Set<Task> getPrioritizedTasks();
+
+    void removeTask(long taskId);
+
+    void removeSubtask(long subtaskId);
+
+    void removeEpic(long epicId);
+
+    void removeTasks();
+
+    void removeSubtasks();
+
+    void removeEpics();
+
+    void removeAllTasks();
 }

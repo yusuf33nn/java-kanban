@@ -10,7 +10,11 @@ import java.util.List;
 
 public class Epic extends Task {
     private LocalDateTime endTime;
-    private final List<Subtask> subtasks;
+    private List<Subtask> subtasks;
+
+    public void setSubtasks(List<Subtask> subtasks) {
+        this.subtasks = subtasks;
+    }
 
     public Epic(String name,
                 String description,

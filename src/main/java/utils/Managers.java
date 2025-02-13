@@ -15,7 +15,13 @@ public class Managers {
     }
 
     public static TaskManager getDefault() {
-        return new FileBackedTaskManager(Path.of("src/main/resources/tasks.csv"));
+        Path path = Path.of("src/main/resources/tasks.csv");
+
+        if (path.toFile().exists()) {
+            return FileBackedTaskManager.loadFromFile(path.toFile());
+        } else {
+            return new FileBackedTaskManager(path);
+        }
     }
 
     public static TaskManager getInMemoryTaskManager() {

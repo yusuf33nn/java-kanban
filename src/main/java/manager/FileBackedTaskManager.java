@@ -27,35 +27,56 @@ public class FileBackedTaskManager extends InMemoryTaskManager {
 
     @Override
     public Task createNewTask(Task task) {
+        var taskId = task.getId();
         var newTask = super.createNewTask(task);
-        save();
+        if (taskId == 0) {
+            save();
+        }
         return newTask;
     }
 
+    public Path getPath() {
+        return path;
+    }
+
     private void save() {
-        try (BufferedWriter bw = new BufferedWriter(new FileWriter(path.toFile(), false))) {
+        File file = path.toFile();
+        if (!path.toFile().exists()) {
+            try {
+                file.createNewFile();
+            } catch (IOException e) {
+                throw new ManagerSaveException("Error creating file: %s with path: '%s'".formatted(e.getMessage(), path.toString()));
+            }
+        }
+        try (BufferedWriter bw = new BufferedWriter(new FileWriter(file, false))) {
             bw.write("id,type,name,status,description,startTime,duration,epic\n");
 
             for (Task task : getAllTasks()) {
-                bw.write(task.toString() + ",\n");
+                bw.write(task.toString(true) + ",\n");
             }
 
             for (Epic epic : getAllEpics()) {
-                bw.write(epic.toString() + ",\n");
+                bw.write(epic.toString(true) + ",\n");
             }
 
             for (Subtask subtask : getAllSubtasks()) {
-                bw.write(subtask.toString() + "," + subtask.getEpic().getId() + "\n");
+                bw.write(subtask.toString(true) + "," + subtask.getEpic().getId() + "\n");
             }
 
         } catch (IOException e) {
-            throw new ManagerSaveException("Error while saving file");
+            throw new ManagerSaveException("Error while saving file: %s".formatted(e.getMessage()));
         }
     }
 
     @Override
     public void updateTask(Task updatedTask) {
         super.updateTask(updatedTask);
+        save();
+    }
+
+    @Override
+    public void removeTask(long taskId) {
+        super.removeTask(taskId);
         save();
     }
 

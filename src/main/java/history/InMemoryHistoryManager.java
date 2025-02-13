@@ -9,6 +9,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.NoSuchElementException;
+import java.util.Optional;
 
 public class InMemoryHistoryManager implements HistoryManager {
 
@@ -80,8 +81,9 @@ public class InMemoryHistoryManager implements HistoryManager {
 
     @Override
     public void remove(long id) {
-        var node = taskHistoryMap.remove(id);
-        removeNode(node);
+        Optional.ofNullable(taskHistoryMap.remove(id))
+                .ifPresent(this::removeNode);
+
     }
 
     @Override
